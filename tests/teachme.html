@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>touchJS tutorial</title>
+		<style>
+			#box{
+				width:300px;
+				height:300px;
+				background-color:#F0CF0C;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="wrapper">
+			<div id="box"></div>
+		</div>
+		<script>
+			var touch = 'this is what touch used to be';
+		</script>
+		<script src="../touchJS.js"></script>
+		<script>
+			touch({
+				element:'#box',
+				types:['all'],
+				touchStartF:function(e){
+					console.log(e);
+				},
+				touchMoveF:function(e){
+					console.log(e);
+				}
+			});
+
+
+			var touchJS = touch.noConflict();
+
+			console.log(touch);
+			console.log(touchJS);
+		</script>
+	</body>
+</html>
