@@ -7,9 +7,11 @@
 });
 */
 
+(function(touchIdentifier){
+
 var touch = {};
 
-touch.invoke = function(obj) {
+touch.invoke = function (obj) {
 	var o = touch,
 	core = o.core,
 	vars = o.vars,
@@ -696,3 +698,16 @@ touch.core = {
 		}
 	}
 };
+
+if(typeof window[touchIdentifier] !== 'undefined'){
+	touch.oldTouch = window[touchIdentifier];
+}
+window[touchIdentifier] = touch.invoke;
+
+touch.invoke.noConflict = function(){
+	window[touchIdentifier] = touch.oldTouch;
+
+	return touch.invoke;
+};
+
+}('touch'));
