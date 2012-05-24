@@ -17,13 +17,13 @@ To listen for touch events on an elements simply pass an object to the touch fun
 * touchEndF - callback function for ending a touch gesture
 
 E.g.
-`touch({
-	element:'#box',
-	types:['all'],
-	touchStartF:function(e){
-		console.log(e);
-	},
-	touchMoveF:function(e){
-		console.log(e);
-	}
-});`
+	touch({
+		element:'#box',
+		types:['all'],
+		touchStartF:function(e){
+			console.log(e);
+		},
+		touchMoveF:function(e){
+			console.log(e);
+		}
+	});
