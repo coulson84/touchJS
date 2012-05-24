@@ -1,0 +1,158 @@
+<html>
+<head>
+	<script type="text/javascript" src="touchstuff_v1.1.js"></script>
+	<style>
+	#containerbase{
+		position: absolute;
+		left: 0
+		top: 0;
+		width: 100%;
+		height: 565px;
+		-webkit-perspective: 700px;
+		-webkit-perspective-origin: 50% 0%;
+		background-color: blue;
+	}
+
+	#container {
+		position: absolute;
+		top: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.text {
+		padding: 20px;
+		background-color: red;
+	}
+
+	.info {
+		position: relative;
+		width: 250px;
+		height: 250px;
+		float: left;
+	}
+</style>
+</head>
+<body>
+	<div id="container">
+		id = container
+		<div class="text">class = text</div>
+		<div class="text">class = text</div>
+		<div id="t"><h1>Some filler text</h1></div>
+		<div id="info1" class ="info">
+			<div id="info1start"></div>
+			<div id="info1current"></div>
+			<div id="info1end"></div>
+		</div>
+		<div id="info2" class ="info">
+			<div id="info2start"></div>
+			<div id="info2current"></div>
+			<div id="info2end"></div>
+		</div>
+		<div id="info3" class ="info">
+			<div id="info3start"></div>
+			<div id="info3current"></div>
+			<div id="info3end"></div>
+		</div>
+		<div id="info4" class ="info">
+			<div id="info4start"></div>
+			<div id="info4current"></div>
+			<div id="info4end"></div>
+		</div>
+		<div id = "containerx"></div>
+	</div>
+</body>
+<SCRIPT>
+var userFuncs = {
+	divs: {
+		s: {
+			1: document.getElementById("info1start"),
+			2: document.getElementById("info2start"),
+			3: document.getElementById("info3start"),
+			4: document.getElementById("info4start")
+		},
+		c: {
+			1: document.getElementById("info1current"),
+			2: document.getElementById("info2current"),
+			3: document.getElementById("info3current"),
+			4: document.getElementById("info4current")
+		},
+		e: {
+			1: document.getElementById("info1end"),
+			2: document.getElementById("info2end"),
+			3: document.getElementById("info3end"),
+			4: document.getElementById("info4end")
+		} 
+	},
+	start: function (e) {
+		"use strict";
+		var divs = this.divs,
+		i,
+		id = touch.getFingerIDs(),
+		vars = touch.vars,
+		idLen,
+		doc = document, 
+		text = "";
+
+		for (i = 0; i < e.touches.length; i++) {
+			divs.s[i]
+			text = 'Touch ID: ' + id[i] +'<br>Start Location: X: ' + vars.xPos[id[i]][0] + '  Y: ' + vars.yPos[id[i]][0];
+			divs.s[i+1].innerHTML = text;
+		}
+	},
+	move: function (e) {
+		"use strict";
+		var i,
+		id = touch.getFingerIDs(),
+		divs = this.divs,
+		vars = touch.vars,
+		idLen, 
+		text = "";
+
+		for (i = 0; i < e.touches.length; i++) {
+			text = 'Touch ID: ' + id[i] +'<br>Current Location: X: ' + vars.xPosNow[id[i]] + '  Y: ' +  vars.yPosNow[id[i]];
+			divs.c[i+1].innerHTML = text;
+		}
+	},
+	end: function (e) {
+		"use strict";
+		var i,
+		vars = touch.vars,
+		doc = document,
+		divs = this.divs,
+		text = "",
+		id = touch.getFingerIDs();
+
+		for ( i = 0; i < id.length; i++){
+			text = 'Touch ID1: ' + id[i] +'<br>End Location: X: ' + vars.xPosNow[id[i]] + '  Y: ' + vars.yPosNow[id[i]];
+			divs.e[i+1].innerHTML = text;
+		}
+	},
+	multitouch: function (e) {
+		console.log("multitouch");
+	},
+	multiend: function (e) {
+		console.log("multiend");
+	}
+};
+
+	
+(function invoke() {	
+	touch.invoke({
+		element: "#container",
+		types: ["all"],
+		touchStartF: function (e) {
+			userFuncs.start(e);
+		},
+		touchMoveF: function (e) {
+			userFuncs.move(e);
+		},
+		touchEndF: function (e) {
+			userFuncs.end(e);
+		},
+		multitouchF: function (e) {
+			userFuncs.move(e);
+		}
+	});
+}());
+</SCRIPT>
+</html>

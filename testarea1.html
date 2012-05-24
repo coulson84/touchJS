@@ -1,0 +1,311 @@
+<html>
+
+<head>
+<script src="touchstuff_v1.1.js"></script>
+<style>
+@-webkit-keyframes rotator {
+	0% {-webkit-transform: rotateZ(0deg);}
+	25% {-webkit-transform: rotateZ(90deg);}
+	50% {-webkit-transform: rotateZ(180deg);}
+	75% {-webkit-transform: rotateZ(270deg);}
+	100% {-webkit-transform: rotateZ(360deg);}
+}
+
+#container {
+	position: absolute;
+	overflow: hidden;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #222222;
+}
+
+#div1, #div2, #div3, #div4, #div5, #div6, #div7, #div8, #div9, #div10, #div0 {
+	position: absolute;
+	display: none;
+	opacity: 0.8;
+	width: 100px;
+	height: 100px;
+	border: 4px solid red;
+	border-radius: 104px;
+	-webkit-transition-duration: 1ms;
+	-webkit-transition-timing-function: linear;
+	-webkit-transition-property: all;
+	
+}
+
+.rotateSection {
+	position: absolute;
+	-webkit-animation: rotator 12s linear infinite;
+	width: 100px;
+	height: 100px;
+}
+
+.info {
+	position: absolute;
+	left: 100px;
+	top: 100px;
+	border: 1px dashed green;
+	font-size: 10px;
+	font-family: Arial;
+	color: white;
+}
+
+#targetT {
+	position: absolute;
+	top: -10px;
+	left: 48px;
+	width: 4px;
+	height: 20px;
+	background-color: red;
+}
+
+#targetL {
+	position: absolute;
+	top: 48px;
+	left: -10px;
+	width: 20px;
+	height: 4px;
+	background-color: red;
+}
+
+#targetB {
+	position: absolute;
+	bottom: -10px;
+	left: 48px;
+	width: 4px;
+	height: 20px;
+	background-color: red;
+}
+
+#targetR {
+	position: absolute;
+	top: 48px;
+	right: -10px;
+	width: 20px;
+	height: 4px;
+	background-color: red;
+}
+</style>
+
+</head>
+
+<body>
+<div id="container">
+<div id="div0" class="here">
+<div class="rotateSection">
+	<div id="targetT"></div>
+	<div id="targetR"></div>
+	<div id="targetB"></div>
+	<div id="targetL"></div>
+</div>
+<div id="div0Info" class="info">
+	0
+</div>
+</div>
+<div id="div1"  class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div1Info" class="info">
+		1
+	</div>
+</div>
+<div id="div2" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div2Info" class="info">
+		2
+	</div>
+</div>
+<div id="div3" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div3Info" class="info">
+		3
+	</div>
+</div>
+<div id="div4" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div4Info" class="info">
+		4
+	</div>
+</div>
+<div id="div5" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div5Info" class="info">
+		5
+	</div>
+</div>
+<div id="div6" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div6Info" class="info">
+		6
+	</div>
+</div>
+<div id="div7" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div7Info" class="info">
+		7
+	</div>
+</div>
+<div id="div8" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div8Info" class="info">
+		8
+	</div>
+</div>
+<div id="div9" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div9Info" class="info">
+		9
+	</div>
+</div>
+<div id="div10" class="here">
+	<div class="rotateSection">
+		<div id="targetT"></div>
+		<div id="targetR"></div>
+		<div id="targetB"></div>
+		<div id="targetL"></div>
+	</div>
+	<div id="div10Info" class="info">
+		10
+	</div>
+</div>
+</div>
+</body>
+<script type="text/javascript">
+var details = {
+	activeDivs: [],
+	timeTest: [],
+	starter: function (e) {
+		"use strict";
+		var o = this,
+		tInfo = touch.vars,
+		len = e.targetTouches.length - 1,
+		id = touch.getFingerIDs(),
+		i;
+
+
+		for(i = len; i >= 0; i--) {
+			o.activeDivs[id[i]] = o.activeDivs[i];
+			o.activeDivs[id[i]].style.left = (tInfo.xPos[id[i]][0] - 50) + "px";
+			o.activeDivs[id[i]].style.top = (tInfo.yPos[id[i]][0] - 50) + "px";
+			o.activeDivs[id[i]].style.display = "block";
+		}
+	},
+	showDetails: function (e) {
+		//console.log("showDetails");
+		"use strict";
+		var o = this,
+		i,
+		xPN = touch.vars.xPosNow,
+		yPN = touch.vars.yPosNow,
+		len = e.touches.length - 1,
+		id = touch.getFingerIDs();
+
+		for(i = len; i >= 0; i--) {
+			o.activeDivs[id[i]].style.left = (xPN[id[i]] - 50) + "px";
+			o.activeDivs[id[i]].style.top = (yPN[id[i]] - 50) + "px";
+			o.activeDivs[id[i]].style.display = "block";
+		}
+	},
+	removeTarget: function (e) {
+		"use strict";
+		//console.log("removeTarget");
+		var o = this,
+		tInfo = touch.vars,
+		aLen = o.activeDivs.length,
+		tLen = e.touches.length,
+		difference = Math.abs(aLen - tLen),
+		i,
+		removed = [];
+
+		e.preventDefault();
+		e.stopPropagation();
+
+		if(e.changedTouches.length > 0) {
+			for (i = e.changedTouches.length - 1; i >= 0; i--) {
+				removed.push(e.changedTouches[i].identifier);
+			}
+		}
+
+		for(i = removed.length - 1; i >= 0; i--) {
+			o.activeDivs[removed[i]].style.display = "none";
+			delete o.activeDivs[removed[i]]
+		}
+	}
+};
+
+(function(){
+	window.addEventListener("load", function() {
+		"use strict";
+		var o = details;
+
+		o.activeDivs[0] = document.getElementById("div0");
+		o.activeDivs[1] = document.getElementById("div1");
+		o.activeDivs[2] = document.getElementById("div2");
+		o.activeDivs[3] = document.getElementById("div3");
+		o.activeDivs[4] = document.getElementById("div4");
+		o.activeDivs[5] = document.getElementById("div5");
+		o.activeDivs[6] = document.getElementById("div6");
+		o.activeDivs[7] = document.getElementById("div7");
+		o.activeDivs[8] = document.getElementById("div8");
+		o.activeDivs[9] = document.getElementById("div9");
+		o.activeDivs[10] = document.getElementById("div10");
+	});
+}());
+touch.invoke({
+	element: "#container",
+	types: ["all"],
+	touchStartF: function(e){details.starter(e)},
+	touchMoveF: function(e){details.showDetails(e)},
+	touchEndF: function(e){details.removeTarget(e)},
+	multitouchF: function(e){details.showDetails(e)},
+	multitouchEndF: function(e){details.removeTarget(e)}
+})
+
+</script>
+</html>

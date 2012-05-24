@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
+		Remove this if you use the .htaccess -->
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+		<title>main</title>
+		<meta name="description" content="" />
+		<meta name="author" content="Joe" />
+		<!-- Replace favicon.ico & apple-touch-icon.png in the root of your domain and delete these references -->
+		<link rel="shortcut icon" href="/favicon.ico" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="text/css" href="boxstyle.css" />
+		<script src="http://www.joecoulson.site90.net/sylvester/sylvester.src.js"></script>
+		<script src="touchstuff_v1.1.js"></script>
+<style>
+#page2container {
+	position: absolute;
+	left: 20px;
+	top: 20px;
+	width: 600px;
+	height: 600px;
+	overflow: hidden;
+	background-color: #d0e4f7;
+	border: solid 2px black;
+	background: #6e7774;
+}
+
+#boxholder {
+	width: 600px;
+	height: 600px;
+	-webkit-perspective: 800px;
+	-moz-perspective: 800px;
+	-ms-perspective: 800px;
+	-o-perspective: 800px;
+	perspective: 800px;
+}
+
+#cover {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+#cube {
+	left: 225px;
+	top: 225px;
+	position: relative;
+	margin: 0px;
+	height: 150px;
+	width: 150px;
+	-webkit-transition: -webkit-transform 1ms;
+	-moz-transition: -moz-transform 1ms;
+	-ms-transition: -moz-transform 1ms;
+	-o-transition: -o-transform 1ms;
+	transition: transform 1ms;
+	-webkit-transform-style: preserve-3d;
+	-moz-transform-style: preserve-3d;
+	-ms-transform-style: preserve-3d;
+	-o-transform-style: preserve-3d;
+	transform-style: preserve-3d;
+  }
+  
+  .face {
+  	border: solid 1px;
+  	border-color: #c6c6c6;
+  	position: absolute;
+ 	height: 148px;
+  	width: 148px;
+  	padding: 0px;
+  	background-color: rgba(50, 50, 50, 0.7);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+  
+  .face h1 {
+  	position: absolute;
+  	left: 5px;
+  	bottom: 0px;
+  	line-height: 0px;
+  	font-family: 'Arial Black', Verdana, sans-serif;
+  	color: #FFFFFF;
+  	text-shadow: 2px 2px 2px #000000;
+  }
+  
+  #cube .one {
+  	-webkit-transform: rotateX(90deg) rotateZ(180deg) translateZ(75px);
+  	-moz-transform: rotateX(90deg) rotateZ(180deg) translateZ(75px);
+  	-ms-transform: rotateX(90deg) rotateZ(180deg) translateZ(75px);
+  	-o-transform: rotateX(90deg) rotateZ(180deg) translateZ(75px);
+  	transform: rotateX(90deg) rotateZ(180deg) translateZ(75px);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+  
+  #cube .two {
+  	-webkit-transform: translateZ(75px);
+  	-moz-transform:  rotateZ(90deg);
+  	-moz-transform: translateZ(75px);
+  	-ms-transform: translateZ(75px);
+  	-o-transform: translateZ(75px);
+  	transform: translateZ(75px);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+  #cube .three {
+  	-webkit-transform: rotateY(90deg) translateZ(75px);
+  	-moz-transform: rotateY(90deg) translateZ(75px);
+  	-ms-transform: rotateY(90deg) translateZ(75px);
+  	-o-transform: rotateY(90deg) translateZ(75px);
+  	transform: rotateY(90deg) translateZ(75px);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+  #cube .four {
+  	-webkit-transform: rotateY(180deg) translateZ(75px);
+  	-moz-transform: rotateY(180deg) translateZ(75px);
+  	-ms-transform: rotateY(180deg) translateZ(75px);
+  	-o-transform: rotateY(180deg) translateZ(75px);
+  	transform: rotateY(180deg) translateZ(75px);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+  #cube .five {
+  	-webkit-transform: rotateY(-90deg) translateZ(75px);
+  	-moz-transform: rotateY(-90deg) translateZ(75px);
+  	-ms-transform: rotateY(-90deg) translateZ(75px);
+  	-o-transform: rotateY(-90deg) translateZ(75px);
+  	transform: rotateY(-90deg) translateZ(75px);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+  #cube .six {
+  	-webkit-transform: rotateX(-90deg) translateZ(75px);
+  	-moz-transform: rotateX(-90deg) translateZ(75px);
+  	-ms-transform: rotateX(-90deg) translateZ(75px);
+  	-o-transform: rotateX(-90deg) translateZ(75px));
+  	transform: rotateX(-90deg) translateZ(75px);
+  	-webkit-backface-visibility: hidden;
+  	-moz-backface-visibility: hidden;
+  	-ms-backface-visibility: hidden;
+  	-o-backface-visibility: hidden;
+  	backface-visibility: hidden;
+  }
+</style>
+</head>
+	<body>
+		<section id="page2container">
+		<div id="boxholder">
+			<div id="cube">
+				<div class="face one"><h1>1</h1></div>
+				<div class="face two"><h1>2</h1></div>
+				<div class="face three"><h1>3</h1></div>
+				<div class="face four"><div><h1>4</h1></div></div>
+				<div class="face five"><h1>5</h1></div>
+				<div class="face six"><h1>6</h1></div>
+			</div>
+		</div>
+		<div id="cover">
+		</div>
+		</section>
+		<script src="transformer.js"></script>
+		<script>
+//the below is all to do with the movement of the cube. Above this point is all to do with the manipulation of the matrices that are used to rotate and scale the cube
+
+moveItem = {
+    scaleValue: 1,
+    alignment: {
+    	xPosStart: 0,
+    	yPosStart: 0,
+    	xPos: 0,
+    	yPos: 0
+    },
+	startFunc: function(e){
+		var oA = this.alignment,
+		temp;
+			oA.yPosStart = oA.yPos; //set start positions to last touch from user
+			oA.xPosStart = oA.xPos;
+			console.log("startFunc: X = " + oA.xPosStart + "    Y = " + oA.yPosStart);
+	},
+	rotate: function(e) {
+		//console.log("rotate");
+		if(touch.vars.isTouching === 2) { //if there are more than 2 fingers touching the screen this ensures no rotation takes place
+			return;
+		}
+		var i, max, matrix, writtenMatrix,
+		o = this,
+		oA = o.alignment,
+		xP = touch.vars.xPos,
+		yP = touch.vars.yPos,
+		xPN = touch.vars.xPosNow,
+		yPN = touch.vars.yPosNow,
+		div = document.getElementById("cube"),
+		div2 = document.getElementById("cover"),
+		xMovement = 0,
+		yMovement = 0,	
+		rotateY = 0,
+		rotateX = 0,
+		id = touch.getFingerIDs();
+		id = id[0];
+
+		xMovement = xP[id][0] - xPN[id];
+		yMovement = yP[id][0] - yPN[id];
+		rotateY = oA.xPosStart - xMovement/2, // YES - these are the correct way around move left/right to rotate around Y axis and vice-versa
+		rotateX = oA.yPosStart + yMovement/2,
+		//console.log("startFunc: X = " + oA.xPosStart + "    Y = " + oA.yPosStart);
+		oA.xPos = rotateY;
+		oA.yPos = rotateX;
+		//console.log("startFunc: X = " + oA.xPos + "    Y = " + oA.yPos);
+		matrix = transformer.transform([0,0,0],[rotateX, rotateY, 0],[o.scaleValue, o.scaleValue, o.scaleValue]);
+		div.style.webkitTransform = matrix;
+		div2.innerHTML = matrix;
+	},
+	zoom: function (e) {
+        var o = this,
+        difference = o.scaleValue - (e.difference / 800),
+		matrix = "",
+        div = document.getElementById("cube"),
+        writtenMatrix = "";
+        console.log("difference");
+
+        matrix = transformer.transform([0,0,0],[o.alignment.yPos, o.alignment.xPos, 0],[difference, difference, difference]);
+        o.newScaleValue = difference;
+        div.style.webkitTransform = matrix;
+    },
+    setMatrix: function(e) {
+    	var o = this;
+    	o.scaleValue = o.newScaleValue; //once the zoom functions are done and fingers removed from screen this updates the zoom level ready for use by the rotate function
+    }
+};	
+
+touch.invoke({
+	element: "#cover",
+	types: ["all"],
+	addMomentum: true,
+	touchStartF: function(e) {moveItem.startFunc(e)},
+	touchMoveF: function(e) {moveItem.rotate(e)},
+	touchEndF: function(e) {},
+	multitouchF: function(e) {moveItem.zoom(e)},
+	multitouchEndF: function(e) {moveItem.setMatrix(e)},
+	momentumF: function(e) {moveItem.rotate(e)}
+})
+</script>
+	</body>
+</html>
