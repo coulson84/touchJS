@@ -40,10 +40,10 @@ touch.invoke = function (element, obj) {
 				obj.touchEndF = o.funcs[i];
 			} else if (typeof obj.touchEndF == 'object') {
 				funcs[i] = {
-					click: (typeof obj.touchEndF.click == "undefined" ) ? funcs.touchEndF.click : obj.touchEndF.click,
-					horizontal: (typeof obj.touchEndF.horizontal == "undefined" ) ? funcs.touchEndF.horizontal : obj.touchEndF.horizontal,
-					vertical: (typeof obj.touchEndF.vertical == "undefined" ) ? funcs.touchEndF.vertical : obj.touchEndF.vertical,
-					twoD: (typeof obj.touchEndF.twoD == "undefined" ) ? funcs.touchEndF.twoD : obj.touchEndF.twoD
+					click: obj.touchEndF.click||funcs.touchEndF.click,
+					horizontal: obj.touchEndF.horizontal || funcs.touchEndF.horizontal,
+					vertical: obj.touchEndF.vertical || funcs.touchEndF.vertical,
+					twoD: obj.touchEndF.twoD || funcs.touchEndF.twoD
 				}
 			} else {
 				funcs[i] = funcs[i];
@@ -58,10 +58,10 @@ touch.invoke = function (element, obj) {
 				obj.touchMoveF = o.funcs[i];
 			} else if (typeof obj.touchMoveF == 'object') {
 				funcs[i] = {
-					click: (typeof obj.touchMoveF.click == "undefined" ) ? funcs.touchMoveF.click : obj.touchMoveF.click,
-					horizontal: (typeof obj.touchMoveF.horizontal == "undefined" ) ? funcs.touchMoveF.horizontal : obj.touchMoveF.horizontal,
-					vertical: (typeof obj.touchMoveF.vertical == "undefined" ) ? funcs.touchMoveF.vertical : obj.touchMoveF.vertical,
-					twoD: (typeof obj.touchMoveF.twoD == "undefined" ) ? funcs.touchMoveF.twoD : obj.touchMoveF.twoD
+					click: obj.touchMoveF.click || funcs.touchMoveF.click,
+					horizontal: obj.touchMoveF.horizontal || funcs.touchMoveF.horizontal,
+					vertical: obj.touchMoveF.vertical || funcs.touchMoveF.vertical,
+					twoD: obj.touchMoveF.twoD || funcs.touchMoveF.twoD
 				}
 			} else {
 				funcs[i] = funcs[i];
