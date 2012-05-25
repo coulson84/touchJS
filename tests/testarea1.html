@@ -287,8 +287,8 @@ var details = {
 		o.activeDivs[10] = document.getElementById("div10");
 	});
 }());
-touch({
-	element: "#container",
+touch('#container',
+{
 	types: ["all"],
 	start: function(e){details.starter(e)},
 	move: function(e){details.showDetails(e)},

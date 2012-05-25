@@ -102,8 +102,8 @@ var moveItem = {
 
 
 
-touch({
-	element: "#box",
+touch('#box',
+{
 	types: ["all"],
 	addMomentum: true,
 	start: function(e) {console.log("WHoaaa!")},
@@ -122,8 +122,8 @@ touch({
 	momentum: function(e) {moveItem.slide(e)}
 })
 
-touch({
-	element: "#box",
+touch('#box',
+{
 	types: ["all"],
 	addMomentum: true,
 	start: function(e) {moveItem.startFunc(e)},
