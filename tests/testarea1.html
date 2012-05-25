@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<script src="touchstuff_v1.1.js"></script>
+<script src="../touchJS.js"></script>
 <style>
 @-webkit-keyframes rotator {
 	0% {-webkit-transform: rotateZ(0deg);}
@@ -224,15 +224,14 @@ var details = {
 		"use strict";
 		var o = this,
 		tInfo = touch.vars,
-		len = e.targetTouches.length - 1,
-		id = touch.getFingerIDs(),
+		len = e.touchesLength - 1,
+		id = e.ids,
 		i;
-
 
 		for(i = len; i >= 0; i--) {
 			o.activeDivs[id[i]] = o.activeDivs[i];
-			o.activeDivs[id[i]].style.left = (tInfo.xPos[id[i]][0] - 50) + "px";
-			o.activeDivs[id[i]].style.top = (tInfo.yPos[id[i]][0] - 50) + "px";
+			o.activeDivs[id[i]].style.left = (e.xPos[id[i]][0] - 50) + "px";
+			o.activeDivs[id[i]].style.top = (e.yPos[id[i]][0] - 50) + "px";
 			o.activeDivs[id[i]].style.display = "block";
 		}
 	},
@@ -241,10 +240,10 @@ var details = {
 		"use strict";
 		var o = this,
 		i,
-		xPN = touch.vars.xPosNow,
-		yPN = touch.vars.yPosNow,
-		len = e.touches.length - 1,
-		id = touch.getFingerIDs();
+		xPN = e.xPosNow,
+		yPN = e.yPosNow,
+		len = e.touchesLength - 1,
+		id = e.ids;
 
 		for(i = len; i >= 0; i--) {
 			o.activeDivs[id[i]].style.left = (xPN[id[i]] - 50) + "px";
@@ -258,19 +257,10 @@ var details = {
 		var o = this,
 		tInfo = touch.vars,
 		aLen = o.activeDivs.length,
-		tLen = e.touches.length,
+		tLen = e.touchesLength,
 		difference = Math.abs(aLen - tLen),
 		i,
-		removed = [];
-
-		e.preventDefault();
-		e.stopPropagation();
-
-		if(e.changedTouches.length > 0) {
-			for (i = e.changedTouches.length - 1; i >= 0; i--) {
-				removed.push(e.changedTouches[i].identifier);
-			}
-		}
+		removed = e.removedFingers;
 
 		for(i = removed.length - 1; i >= 0; i--) {
 			o.activeDivs[removed[i]].style.display = "none";
@@ -297,14 +287,14 @@ var details = {
 		o.activeDivs[10] = document.getElementById("div10");
 	});
 }());
-touch.invoke({
+touch({
 	element: "#container",
 	types: ["all"],
-	touchStartF: function(e){details.starter(e)},
-	touchMoveF: function(e){details.showDetails(e)},
-	touchEndF: function(e){details.removeTarget(e)},
-	multitouchF: function(e){details.showDetails(e)},
-	multitouchEndF: function(e){details.removeTarget(e)}
+	start: function(e){details.starter(e)},
+	move: function(e){details.showDetails(e)},
+	end: function(e){details.removeTarget(e)},
+	multitouch: function(e){details.showDetails(e)},
+	multiend: function(e){details.removeTarget(e)}
 })
 
 </script>

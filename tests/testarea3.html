@@ -1,6 +1,6 @@
 <html>
 <head>
-	<script src="http://www.joecoulson.site90.net/sylvester/sylvester.src.js"></script>
+	<script src="../../sylvester/sylvester.src.js"></script>
 	<style>
 	#container {
 		position: absolute;
@@ -23,7 +23,7 @@
 		color: white;
 		text-align: center;
 		-webkit-transition-property: all;
-		-webkit-transition-duration: 10ms;
+		-webkit-transition-duration: 16ms;
 		-webkit-transition-
 	}
 
@@ -45,141 +45,10 @@
 	</div>
 </body>
 
-<script src="touchstuff_v1.1.js"></script>
+<script src="../touchJS.js"></script>
+<script src="../../transformJS/transformJS.js"></script>
 <script>
-
-var transformer = {
-	xRot: function (angle) {
-		"use strict";
-		var x = angle * (Math.PI / 180),
-		matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-		matrix[1][1] = Math.cos(-x);
-		matrix[1][2] = Math.sin(x);
-		matrix[2][1] = Math.sin(-x);
-		matrix[2][2] = Math.cos(-x);
-		return matrix;
-	},
-	yRot: function (angle) {
-		"use strict";
-		var x = angle * (Math.PI / 180),
-		matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-		matrix[0][0] = Math.cos(-x);
-		matrix[0][2] = Math.sin(-x);
-		matrix[2][0] = Math.sin(x);
-		matrix[2][2] = Math.cos(-x);
-		return matrix;
-	},
-	zRot: function (angle) {
-		"use strict";
-		var x = angle * (Math.PI / 180),
-			matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-		matrix[0][0] = Math.cos(x);
-		matrix[0][1] = Math.sin(x);
-		matrix[1][0] = Math.sin(-x);
-		matrix[1][1] = Math.cos(x);
-		return matrix;
-	},
-	translate: function (x, y, z) {
-		"use strict";
-		var matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-		matrix[3][0] = x;
-		matrix[3][1] = y;
-		matrix[3][2] = z;
-		return matrix;
-	},
-	origin: function (x, y, z) {
-		"use strict";
-		var matrix = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-		matrix[0][3] = x;
-		matrix[1][3] = y;
-		matrix[2][3] = z;
-		return matrix;
-	},
-	transform: function (translations, rotations, scales, origins) { //translations in pixels in order [x, y, z] rotations given in degrees in order [xrotation, yrotation, zrotation]
-		"use strict";
-		var xR = rotations[0],
-			yR = rotations[1],
-			zR = rotations[2],
-			xT = translations[0],
-			yT = translations[1],
-			zT = translations[2],
-			xS,
-			yS,
-			zS,
-			tS,
-			xOValue,
-			yOValue,
-			zOValue,
-			translateMatrix,
-			scaleMatrix,
-			combinedMatrix,
-			cssText;
-
-		if (!scales) {
-			xS = 1;
-			yS = 1;
-			zS = 1;
-			tS = 1;
-		} else {
-			xS = scales[0];
-			yS = scales[1];
-			zS = scales[2];
-			tS = 1; //chances of wanting this as anything other than 1 are very slim
-		}
-
-		if (!origins) {
-			xOValue = 0;
-			yOValue = 0;
-			zOValue = 0;
-		} else {
-			xOValue = origins[0];
-			yOValue = origins[1];
-			zOValue = origins[2];
-		}
-	
-		scaleMatrix = Matrix.create([[xS, 0, 0, 0], [0, yS, 0, 0], [0, 0, zS, 0], [0, 0, 0, 1]]); //set scalar quantities
-		//set matrices to matrix objects for use by sylvester.js
-		xR = Matrix.create(transformer.xRot(xR));
-		yR = Matrix.create(transformer.yRot(yR));
-		zR = Matrix.create(transformer.zRot(zR));
-		translateMatrix = Matrix.create(transformer.translate(xT, yT, zT));
-		//multiply matrices
-		combinedMatrix = xR.x(yR).x(zR).x(scaleMatrix).x(translateMatrix);
-		//write output
-		cssText	= this.writeMatrix(combinedMatrix);
-		return cssText;
-	},
-	writeMatrix: function (matrix) {
-		"use strict";
-		var i, j, z, output, 
-		count = 0,
-		arr = [];
-
-		if (!matrix.length) {
-			for(i in matrix) {
-				if(!matrix.hasOwnProperty(i)){continue}
-				for(j = 0; j < matrix[i].length; j++) {
-					for(z = 0; z < matrix[i][j].length; z++) {
-						arr[count] = (matrix[i][j][z]).toFixed(20);
-						count++;
-					}
-				}
-			}
-		} else {
-			for(i = 0; i < matrix.length; i++) {
-				for (j = 0; j < matrix[i].length; j++) {
-					arr[count] = (matrix[i][j]).toFixed(20);
-					count++;
-				}
-			}
-		}
-		output = "matrix3d(" + arr + ")";
-		return output;
-	}
-},
-
-
-moveItem = {
+var moveItem = {
 	getPos: {
 		lastX: 0,
 		lastY: 0,
@@ -188,34 +57,34 @@ moveItem = {
 	},
 	startFunc: function() {
 		var o = this;
-		o.getPos.thisX = o.getPos.lastX
-		o.getPos.thisY = o.getPos.lastY
+		o.getPos.thisX = o.getPos.lastX;
+		o.getPos.thisY = o.getPos.lastY;
 	},
 	slide: function(e) {
 		var o = this,
-		tInfo = touch.vars,
 		div = document.getElementById("boxbase"),
 		xMovement = 0,
 		yMovement = 0,
-		speed = touch.vars.speed,
+		speedY = e.speedY,
+		speedX = e.speedX,
 		matrix = "",
-		id = touch.getFingerIDs(),
-		xP = touch.vars.xPos;
+		id = e.ids,
+		xP = e.xPos;
 
-		xMovement = o.getPos.thisX - (tInfo.xPos[id][0] - tInfo.xPosNow[id]);
-		yMovement = o.getPos.thisY - (tInfo.yPos[id][0] - tInfo.yPosNow[id]);
+		xMovement = o.getPos.thisX + e.displacementX[id[0]];
+		yMovement = o.getPos.thisY + e.displacementY[id[0]];
 		switch (true) {
-			case (speed.X > 1 && (xMovement >= window.innerWidth - div.offsetLeft - (200 + 4))):
-				speed.X = -speed.X;
+			case (speedX > 1 && (xMovement >= window.innerWidth - div.offsetLeft - (200 + 4))):
+				e.speedX = -speedX;
 				break;
-			case (speed.X < -1 && xMovement <= -div.offsetLeft):
-				speed.X = -speed.X;
+			case (speedX < -1 && xMovement <= -div.offsetLeft):
+				e.speedX = -speedX;
 				break;
-			case (speed.Y > 1 && (yMovement >= window.innerHeight - div.offsetTop - (200 + 4))):
-				speed.Y = -speed.Y;
+			case (speedY > 1 && (yMovement >= window.innerHeight - div.offsetTop - (200 + 4))):
+				e.speedY = -speedY;
 				break;
-			case (speed.Y < -1 && yMovement <= -div.offsetTop):
-				speed.Y = -speed.Y;
+			case (speedY < -1 && yMovement <= -div.offsetTop):
+				e.speedY = -speedY;
 				break;
 			default:
 				break;
@@ -224,20 +93,22 @@ moveItem = {
 		o.getPos.lastX = xMovement;
 		o.getPos.lastY = yMovement;
 
-		matrix = transformer.transform([xMovement,yMovement,0],[0,0,0]);
+		matrix = transformer.transform({
+			translations: [xMovement,yMovement,0]
+		});
 		div.style.webkitTransform = matrix;
 	}
 };
 
 
 
-touch.invoke({
+touch({
 	element: "#box",
 	types: ["all"],
 	addMomentum: true,
-	touchStartF: function(e) {console.log("WHoaaa!")},
-	touchMoveF: function(e) {moveItem.slide(e)},
-	touchEndF: {
+	start: function(e) {console.log("WHoaaa!")},
+	move: function(e) {moveItem.slide(e)},
+	end: {
 		click: function(e) {
 			var div = document.getElementById("boxbase"),
 			rand1 = Math.floor(Math.random()*255)+1,
@@ -248,17 +119,16 @@ touch.invoke({
 			div.style.backgroundColor = colour;
 		}
 	},
-	momentumF: function(e) {moveItem.slide(e)}
+	momentum: function(e) {moveItem.slide(e)}
 })
 
-touch.invoke({
+touch({
 	element: "#box",
 	types: ["all"],
 	addMomentum: true,
-	touchStartF: function(e) {moveItem.startFunc(e)},
-	touchMoveF: function(e) {moveItem.slide(e)},
-	momentumF: function(e) {moveItem.slide(e)},
-	touchEndF: function(e) {console.log("do ender")}
+	start: function(e) {moveItem.startFunc(e)},
+	move: function(e) {moveItem.slide(e)},
+	momentum: function(e) {moveItem.slide(e)}
 })
 </script>
 </html>
