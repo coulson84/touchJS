@@ -13,20 +13,20 @@ var touch = {};
 
 touch.invoke = function (element, obj) {
 	var o = touch,
-	core = o.core,
-	vars = o.vars,
-	funcs = o.funcs,
-	listeners = o.listeners,
-	el = /*(obj.element.charAt(0) === "#") ? document.querySelectorAll(obj.element)[0] : document.querySelectorAll(obj.element),*/ core.setTarget(element),
-	e, i, j, h, temp,
-	place = 0;
+		core = o.core,
+		vars = o.vars,
+		funcs = o.funcs,
+		listeners = o.listeners,
+		el = core.setTarget(element),
+		e, i, j, h, temp,
+		place = 0;
 
 	vars.addMomentum = obj.addMomentum || false;
 	/*deals with the functions or objects passed to the invoke method*/
-	funcs.start = (typeof obj.start == 'undefined') ? funcs.start : obj.start;
-	funcs.multitouch = (typeof obj.multitouch == 'undefined') ? funcs.multitouch : obj.multitouch;
-	funcs.multiend = (typeof obj.multiend == 'undefined') ? funcs.multiend : obj.multiend; /*might not be necessary*/
-	funcs.momentum = (typeof obj.momentum == 'undefined') ? funcs.momentum : obj.momentum;
+	funcs.start = obj.start || funcs.start;
+	funcs.multitouch = obj.multitouch || funcs.multitouch;
+	funcs.multiend = obj.multiend ||funcs.multiend;
+	funcs.momentum = obj.momentum || funcs.momentum;
 
 	for(i in o.funcs) {
 		if (obj.types[0] === 'all' && i == 'end') {
@@ -40,12 +40,10 @@ touch.invoke = function (element, obj) {
 				obj.end = o.funcs[i];
 			} else if (typeof obj.end == 'object') {
 				funcs[i] = {
-
-					click: (typeof obj.end.click == "undefined" ) ? funcs.end.click : obj.end.click,
-					horizontal: (typeof obj.end.horizontal == "undefined" ) ? funcs.end.horizontal : obj.end.horizontal,
-					vertical: (typeof obj.end.vertical == "undefined" ) ? funcs.end.vertical : obj.end.vertical,
-					twoD: (typeof obj.end.twoD == "undefined" ) ? funcs.end.twoD : obj.end.twoD
-
+					click: obj.end.click || funcs.end.click,
+					horizontal: obj.end.horizontal || funcs.end.horizontal,
+					vertical: obj.end.vertical || funcs.end.vertical,
+					twoD: obj.end.twoD || funcs.end.twoD
 				}
 			} else {
 				funcs[i] = funcs[i];
@@ -60,13 +58,10 @@ touch.invoke = function (element, obj) {
 				obj.move = o.funcs[i];
 			} else if (typeof obj.move == 'object') {
 				funcs[i] = {
-
-
-					click: (typeof obj.move.click == "undefined" ) ? funcs.move.click : obj.move.click,
-					horizontal: (typeof obj.move.horizontal == "undefined" ) ? funcs.move.horizontal : obj.move.horizontal,
-					vertical: (typeof obj.move.vertical == "undefined" ) ? funcs.move.vertical : obj.move.vertical,
-					twoD: (typeof obj.move.twoD == "undefined" ) ? funcs.move.twoD : obj.move.twoD
-
+					click: obj.move.click || funcs.move.click,
+					horizontal:obj.move.horizontal || funcs.move.horizontal,
+					vertical: obj.move.vertical || funcs.move.vertical,
+					twoD: obj.move.twoD || funcs.move.twoD
 				}
 			} else {
 				funcs[i] = funcs[i];
