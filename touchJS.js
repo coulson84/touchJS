@@ -11,13 +11,13 @@
 
 var touch = {};
 
-touch.invoke = function (obj) {
+touch.invoke = function (element, obj) {
 	var o = touch,
 	core = o.core,
 	vars = o.vars,
 	funcs = o.funcs,
 	listeners = o.listeners,
-	el = /*(obj.element.charAt(0) === "#") ? document.querySelectorAll(obj.element)[0] : document.querySelectorAll(obj.element),*/ core.setTarget(obj.element),
+	el = /*(obj.element.charAt(0) === "#") ? document.querySelectorAll(obj.element)[0] : document.querySelectorAll(obj.element),*/ core.setTarget(element),
 	e, i, j, h, temp,
 	place = 0;
 
