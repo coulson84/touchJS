@@ -12,8 +12,8 @@
 		<link rel="shortcut icon" href="/favicon.ico" />
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="text/css" href="boxstyle.css" />
-		<script src="http://www.joecoulson.site90.net/sylvester/sylvester.src.js"></script>
-		<script src="touchstuff_v1.1.js"></script>
+		<script src="../../sylvester/sylvester.src.js"></script>
+		<script src="../touchJS.js"></script>
 <style>
 #page2container {
 	position: absolute;
@@ -180,7 +180,7 @@
 		<div id="cover">
 		</div>
 		</section>
-		<script src="transformer.js"></script>
+		<script src="../../transformJS/transformJS.js"></script>
 		<script>
 //the below is all to do with the movement of the cube. Above this point is all to do with the manipulation of the matrices that are used to rotate and scale the cube
 
@@ -201,23 +201,23 @@ moveItem = {
 	},
 	rotate: function(e) {
 		//console.log("rotate");
-		if(touch.vars.isTouching === 2) { //if there are more than 2 fingers touching the screen this ensures no rotation takes place
+		if(e.touchesLength >= 2) { //if there are more than 2 fingers touching the screen this ensures no rotation takes place
 			return;
 		}
 		var i, max, matrix, writtenMatrix,
 		o = this,
 		oA = o.alignment,
-		xP = touch.vars.xPos,
-		yP = touch.vars.yPos,
-		xPN = touch.vars.xPosNow,
-		yPN = touch.vars.yPosNow,
+		xP = e.xPos,
+		yP = e.yPos,
+		xPN = e.xPosNow,
+		yPN = e.yPosNow,
 		div = document.getElementById("cube"),
 		div2 = document.getElementById("cover"),
 		xMovement = 0,
 		yMovement = 0,	
 		rotateY = 0,
 		rotateX = 0,
-		id = touch.getFingerIDs();
+		id = e.ids,
 		id = id[0];
 
 		xMovement = xP[id][0] - xPN[id];
@@ -228,7 +228,11 @@ moveItem = {
 		oA.xPos = rotateY;
 		oA.yPos = rotateX;
 		//console.log("startFunc: X = " + oA.xPos + "    Y = " + oA.yPos);
-		matrix = transformer.transform([0,0,0],[rotateX, rotateY, 0],[o.scaleValue, o.scaleValue, o.scaleValue]);
+		matrix = transformer.transform({
+			translations: [0,0,0],
+			rotations: [rotateX, rotateY, 0],
+			scales: [o.scaleValue, o.scaleValue, o.scaleValue]
+		});
 		div.style.webkitTransform = matrix;
 		div2.innerHTML = matrix;
 	},
@@ -238,7 +242,6 @@ moveItem = {
 		matrix = "",
         div = document.getElementById("cube"),
         writtenMatrix = "";
-        console.log("difference");
 
         matrix = transformer.transform([0,0,0],[o.alignment.yPos, o.alignment.xPos, 0],[difference, difference, difference]);
         o.newScaleValue = difference;
@@ -250,16 +253,16 @@ moveItem = {
     }
 };	
 
-touch.invoke({
+touch({
 	element: "#cover",
 	types: ["all"],
 	addMomentum: true,
-	touchStartF: function(e) {moveItem.startFunc(e)},
-	touchMoveF: function(e) {moveItem.rotate(e)},
-	touchEndF: function(e) {},
-	multitouchF: function(e) {moveItem.zoom(e)},
-	multitouchEndF: function(e) {moveItem.setMatrix(e)},
-	momentumF: function(e) {moveItem.rotate(e)}
+	start: function(e) {moveItem.startFunc(e)},
+	move: function(e) {moveItem.rotate(e)},
+	end: function(e) {},
+	multitouch: function(e) {moveItem.zoom(e)},
+	multiend: function(e) {moveItem.setMatrix(e)},
+	momentum: function(e) {moveItem.rotate(e)}
 })
 </script>
 	</body>

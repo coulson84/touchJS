@@ -140,16 +140,16 @@ var userFuncs = {
 	touch.invoke({
 		element: "#container",
 		types: ["all"],
-		touchStartF: function (e) {
+		start: function (e) {
 			userFuncs.start(e);
 		},
-		touchMoveF: function (e) {
+		move: function (e) {
 			userFuncs.move(e);
 		},
-		touchEndF: function (e) {
+		end: function (e) {
 			userFuncs.end(e);
 		},
-		multitouchF: function (e) {
+		multitouch: function (e) {
 			userFuncs.move(e);
 		}
 	});
