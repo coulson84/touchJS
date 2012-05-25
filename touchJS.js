@@ -21,12 +21,12 @@ touch.invoke = function (element, obj) {
 	e, i, j, h, temp,
 	place = 0;
 
-	vars.addMomentum = (typeof obj.addMomentum == "undefined") ? false : obj.addMomentum;
+	vars.addMomentum = obj.addMomentum || false;
 	/*deals with the functions or objects passed to the invoke method*/
-	funcs.touchStartF = (typeof obj.touchStartF == 'undefined') ? funcs.touchStartF : obj.touchStartF;
-	funcs.multitouchF = (typeof obj.multitouchF == 'undefined') ? funcs.multitouchF : obj.multitouchF;
-	funcs.multitouchEndF = (typeof obj.multitouchEndF == 'undefined') ? funcs.multitouchEndF : obj.multitouchEndF; /*might not be necessary*/
-	funcs.momentumF = (typeof obj.momentumF == 'undefined') ? funcs.momentumF : obj.momentumF;
+	funcs.touchStartF = obj.touchStartF || funcs.touchStartF;
+	funcs.multitouchF = obj.multitouchF || funcs.multitouchF;
+	funcs.multitouchEndF = obj.multitouchEndF || funcs.multitouchEndF; /*might not be necessary*/
+	funcs.momentumF = obj.momentumF || funcs.momentumF;
 
 	for(i in o.funcs) {
 		if (obj.types[0] === 'all' && i == 'touchEndF') {
