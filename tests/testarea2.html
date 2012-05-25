@@ -253,8 +253,7 @@ moveItem = {
     }
 };	
 
-touch({
-	element: "#cover",
+touch('#cover', {
 	types: ["all"],
 	addMomentum: true,
 	start: function(e) {moveItem.startFunc(e)},
