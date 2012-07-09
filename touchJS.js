@@ -1,5 +1,4 @@
-/*touch.invoke({
-        element: "somediv",
+/*touch.invoke('someDiv', {
         types: ["twoD"],
         start: function(e) {},
         move: function(e) {},
@@ -79,9 +78,6 @@ touch.invoke = function (element, obj) {
 		}
 	}
 
-
-	console.log(typeof el); /*safari currently passing back the function that el is assigned to rather than the array of class elements!?
-	set event listeners on element(s) passed in to the invoke method.*/
 	if(typeof el === 'string' || el[0] == 'undefined') {
 		console.log('event listeners not set - your element "' + el + '" was not a valid CSS class or ID selector')
 	} else if (typeof el == 'object' && el.length == undefined) {
@@ -116,7 +112,6 @@ touch.invoke = function (element, obj) {
 			listeners[el.id].multitouchA.push(funcs.multitouch);
 			listeners[el.id].multiendA.push(funcs.multiend);
 		} else {
-			/*check functions currently set against functions to be assigned - log if changed or overwrites occur*/
 			console.log("There are event listeners already set on this element - checking for duplicates and conflicts......")
 			for (i in listeners[el.id]) {
 				if(typeof listeners[el.id][i] == 'function') {
@@ -177,7 +172,7 @@ touch.funcs = {
 		twoD: function(e) {console.log('No 2D move functions set')},
 	},
 	end: {
-		click: function(e) {console.log('No click move functions set')},
+		click: function(e) {console.log('No click touch functions set')},
 		horizontal: function(e) {console.log('No horizontal end functions set')},
 		vertical: function(e) {console.log('No vertical end functions set')},
 		twoD: function(e) {console.log('No 2D end functions set')},
