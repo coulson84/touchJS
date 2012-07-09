@@ -1,11 +1,3 @@
-/*touch.invoke('someDiv', {
-        types: ["twoD"],
-        start: function(e) {},
-        move: function(e) {},
-        end: function(e) {}     
-});
-*/
-
 (function(touchIdentifier){
 
 var touch = {};
