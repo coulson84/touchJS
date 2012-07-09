@@ -26,7 +26,7 @@ touch.invoke = function (element, obj) {
 					click: obj.end,
 					horizontal: obj.end,
 					vertical: obj.end,
-					twoD: obj.end,
+					twoD: obj.end
 				};
 				obj.end = o.funcs[i];
 			} else if (typeof obj.end == 'object') {
@@ -35,7 +35,7 @@ touch.invoke = function (element, obj) {
 					horizontal: obj.end.horizontal || funcs.end.horizontal,
 					vertical: obj.end.vertical || funcs.end.vertical,
 					twoD: obj.end.twoD || funcs.end.twoD
-				}
+				};
 			} else {
 				funcs[i] = funcs[i];
 			}
@@ -44,7 +44,7 @@ touch.invoke = function (element, obj) {
 				funcs[i] = {
 					horizontal: obj.move,
 					vertical:  obj.move,
-					twoD:  obj.move,
+					twoD:  obj.move
 				};
 				obj.move = o.funcs[i];
 			} else if (typeof obj.move == 'object') {
@@ -53,7 +53,7 @@ touch.invoke = function (element, obj) {
 					horizontal:obj.move.horizontal || funcs.move.horizontal,
 					vertical: obj.move.vertical || funcs.move.vertical,
 					twoD: obj.move.twoD || funcs.move.twoD
-				}
+				};
 			} else {
 				funcs[i] = funcs[i];
 			}
@@ -65,14 +65,14 @@ touch.invoke = function (element, obj) {
 			for(j = obj.types.length - 1; j >= 0; j --) {
 				funcs[i][obj.types[j]] = obj.end;
 			}
-		} else if (obj.types == undefined || typeof obj.types != "object" || (typeof obj.types == "object" && obj.types[0] == undefined)) {
-			console.log('Check the types array in your invocation object')
+		} else if (obj.types === undefined || typeof obj.types !== "object" || (typeof obj.types === "object" && obj.types[0] === undefined)) {
+			console.log('Check the types array in your invocation object');
 		}
 	}
 
 	if(typeof el === 'string' || el[0] == 'undefined') {
-		console.log('event listeners not set - your element "' + el + '" was not a valid CSS class or ID selector')
-	} else if (typeof el == 'object' && el.length == undefined) {
+		console.log('event listeners not set - your element "' + el + '" was not a valid CSS class or ID selector');
+	} else if (typeof el === 'object' && el.length === undefined) {
 		if (typeof listeners[el.id] == 'undefined') {
 			el.addEventListener('touchstart', function(e){
 				core.touchStart(e);
@@ -103,8 +103,21 @@ touch.invoke = function (element, obj) {
 			listeners[el.id].endA.push(funcs.end);
 			listeners[el.id].multitouchA.push(funcs.multitouch);
 			listeners[el.id].multiendA.push(funcs.multiend);
+		} else if (typeof el === 'object' && el.length >= 1) {
+			for (i = 0; i < el.length; i++) {
+				console.log('event listener set on element No. '+i+' of class "' + el[i].className + '"');
+				el[i].addEventListener('touchstart', function(e){
+					core.touchStart(e);
+				});
+				el[i].addEventListener('touchmove', function(e){
+					core.touchMove(e);
+				});
+				el[i].addEventListener('touchend', function(e){
+					core.touchEnd(e);
+				});
+			}
 		} else {
-			console.log("There are event listeners already set on this element - checking for duplicates and conflicts......")
+			console.log("There are event listeners already set on this element - checking for duplicates and conflicts......");
 			for (i in listeners[el.id]) {
 				if(typeof listeners[el.id][i] == 'function') {
 					if (!obj[i]) {
@@ -123,15 +136,15 @@ touch.invoke = function (element, obj) {
 				} else if (typeof listeners[el.id][i] == 'object') {
 					if (!obj[i]) {
 						continue;
-					} else 
-					console.log('\n    Attempt to apply ' + i + ' object to an existing event listener. Checking if functions within the object are duplicates......')
-					place = listeners[el.id][i + 'A'].length;
+					} else {
+						console.log('\n    Attempt to apply ' + i + ' object to an existing event listener. Checking if functions within the object are duplicates......');
+						place = listeners[el.id][i + 'A'].length;
 					for (j in listeners[el.id][i]) {
 						if(listeners[el.id][i][j].toString() == obj[i][j].toString()) { /*Need toString to compare functions to ensure matching works*/
-							console.log('        Attempt to apply duplicate ' + j + ' function to ' + i + ' object function to "' + el.id + '" - Duplicate event listener not set')
+							console.log('        Attempt to apply duplicate ' + j + ' function to ' + i + ' object function to "' + el.id + '" - Duplicate event listener not set');
 							funcs[i][j] = listeners[el.id][i][j];
 						} else {
-							console.log('        No duplicate ' + j + ' function detected in ' + i + ' object on element "'+ el.id + '"  (there may now be two different ' + i + ' functions assigned)')
+							console.log('        No duplicate ' + j + ' function detected in ' + i + ' object on element "'+ el.id + '"  (there may now be two different ' + i + ' functions assigned)');
 							/*augment function object to add new function to the element*/
 							listeners[el.id][i + 'A'][place] = obj[i];
 						}
@@ -139,39 +152,26 @@ touch.invoke = function (element, obj) {
 				}
 			}
 		}
-	} else if (typeof el == 'object' && el.length >= 1) {
-		for (i = 0; i < el.length; i++) {
-			console.log('event listener set on element No. '+i+' of class "' + el[i].className + '"');
-			el[i].addEventListener('touchstart', function(e){
-				core.touchStart(e);
-			});
-			el[i].addEventListener('touchmove', function(e){
-				core.touchMove(e);
-			});
-			el[i].addEventListener('touchend', function(e){
-				core.touchEnd(e);
-			});
-		}
 	}
-};
+}
 
 touch.funcs = {
-	start: function(e) {console.log('No Start Function Set')},
+	start: function(e) {console.log('No Start Function Set');},
 	move: {
-		click: function(e) {console.log('No touch hold move functions set')},
-		horizontal: function(e) {console.log('No horizontal move functions set')},
-		vertical: function(e) {console.log('No vertical move functions set')},
-		twoD: function(e) {console.log('No 2D move functions set')},
+		click: function(e) {console.log('No touch hold move functions set');},
+		horizontal: function(e) {console.log('No horizontal move functions set');},
+		vertical: function(e) {console.log('No vertical move functions set');},
+		twoD: function(e) {console.log('No 2D move functions set');}
 	},
 	end: {
-		click: function(e) {console.log('No click touch functions set')},
-		horizontal: function(e) {console.log('No horizontal end functions set')},
-		vertical: function(e) {console.log('No vertical end functions set')},
-		twoD: function(e) {console.log('No 2D end functions set')},
+		click: function(e) {console.log('No click touch functions set');},
+		horizontal: function(e) {console.log('No horizontal end functions set');},
+		vertical: function(e) {console.log('No vertical end functions set');},
+		twoD: function(e) {console.log('No 2D end functions set');}
 	},
-	multitouch: function(e) {console.log('No multitouch function set')},
-	multiend: function(e) {console.log('No multitouch end function set')},
-	momentum: function(e) {console.log('No momentum function set')}
+	multitouch: function(e) {console.log('No multitouch function set');},
+	multiend: function(e) {console.log('No multitouch end function set');},
+	momentum: function(e) {console.log('No momentum function set');}
 };
 
 touch.listeners = {
@@ -193,7 +193,7 @@ touch.listeners = {
 					target = eT.parentElement.id;
 				} else if (i == eT.parentElement.className) {
 					target= eT.parentElement.className;
-				} else if (i != eT.parentElement.id || i != eT.parentElement.className) { 
+				} else if (i != eT.parentElement.id || i != eT.parentElement.className) {
 					if (i == eT.parentElement.parentElement.id) {
 						target = eT.parentElement.parentElement.id;
 					} else if (i == eT.parentElement.parentElement.className) {
@@ -236,7 +236,7 @@ touch.options = {
 	xFriction: 0.05,
 	yFriction: 0.05,
 	xMovThreshold: 20,
-	yMovThreshold: 20,
+	yMovThreshold: 20
 };
 
 touch.getFingerIDs = function() {
@@ -246,13 +246,12 @@ touch.getFingerIDs = function() {
 	id = [],
 	i;
 
-	for (var i in xP) {
+	for (i in xP) {
 		if (xP.hasOwnProperty(i) && typeof(i) !== 'function') {
-    		id.push(i);
-    		//break;
+			id.push(i);
 		}
 	}
-	id.sort(function(a,b){return b-a});
+	id.sort(function(a,b){return b-a;});
 	return id;
 };
 touch.core = {
@@ -296,14 +295,14 @@ touch.core = {
 		ev.yPos = vars.yPos;
 		ev.timeStamps = vars.timeStamps;
 		ev.touchesLength = e.touches.length;
-		ev.changedTouchesLength = e.changedTouches.length
+		ev.changedTouchesLength = e.changedTouches.length;
 
 		if(listeners[target].startA.length == 1) {
 			listeners[target].startA[0](ev);
 		} else {
 			for (i = listeners[target].startA.length - 1; i >= 0; i--) {
 				listeners[target].startA[i](ev);
-			};
+			}
 		}
 	},
 	touchMove: function(e) {
@@ -353,7 +352,7 @@ touch.core = {
 		ev.xPosNow = xPN;
 		ev.yPosNow = yPN;
 		ev.touchesLength = e.touches.length;
-		ev.changedTouchesLength = e.changedTouches.length
+		ev.changedTouchesLength = e.changedTouches.length;
 
 		if (e.touches.length == 1) {
 			x = Math.abs(xP[id][0] - xPN[id]);
@@ -371,7 +370,7 @@ touch.core = {
 						//console.log("Hori");
 						funcs[target].move[0].horizontal(ev);
 					} else {
-						//console.log("click");				
+						//console.log("click");
 						/*click - do nothing*/
 					}
 				}
@@ -388,7 +387,7 @@ touch.core = {
 							//console.log("Hori");
 							touch.listeners[target].moveA[i].horizontal(ev);
 						} else {
-							//console.log("click");				
+							//console.log("click");
 							/*click - do nothing*/
 						}
 					}
@@ -412,7 +411,9 @@ touch.core = {
 		i, id1, id2,
 		target = "HTMLElement",
 		len = 0,
-		max = 0;
+		max = 0,
+		xP = 0,
+		yP = 0;
 
 		e.preventDefault();
 		e.stopPropagation();
@@ -444,11 +445,11 @@ touch.core = {
 		ev.ids = touch.getFingerIDs(e);
 		ev.xPos = xP;
 		ev.yPos = yP;
-		ev.timeStamps = tVars.timeStamps;
-		ev.xPosNow = xPN;
-		ev.yPosNow = yPN;
+		ev.timeStamps = vars.timeStamps;
+		ev.xPosNow = vars.xPosNow;
+		ev.yPosNow = vars.yPosNow;
 		ev.touchesLength = e.touches.length;
-		ev.changedTouchesLength = e.changedTouches.length
+		ev.changedTouchesLength = e.changedTouches.length;
 		ev.target = touch.listeners.findTarget(e);
 
 		if (touch.listeners[ev.target].multitouchA.length === 1) {
@@ -493,7 +494,7 @@ touch.core = {
 			}
 		}
 
-		if (e.touches.length == 0 && cT.length == 1) { /*if one finger has been touching and is removed*/
+		if (e.touches.length === 0 && cT.length === 1) { //if one finger has been touching and is removed
 			id = cT[0].identifier;
 			ev.systemInfo = e;
 			ev.ids = touch.getFingerIDs(e);
@@ -509,7 +510,7 @@ touch.core = {
 			x = Math.abs(vars.xPos[id][0] - vars.xPosNow[id]);
 			y = Math.abs(vars.yPos[id][0] - vars.yPosNow[id]);
 			ev.target = touch.listeners.findTarget(e);
-			ev.changedTouchesLength = e.changedTouches.length
+			ev.changedTouchesLength = e.changedTouches.length;
 			touch.core.getSpeed(ev);
 		} else if (cT.length >= 1 && e.touches.length > 0) {	/*if more than on finger is touching but not all fingers have been removed from the screen*/
 			for (i = len; i >= 0; i--) {
@@ -527,7 +528,7 @@ touch.core = {
 				ev.speedY = touch.vars.speed.Y;
 				x = Math.abs(vars.xPos[id][0] - vars.xPosNow[id]);
 				y = Math.abs(vars.yPos[id][0] - vars.yPosNow[id]);
-				ev.changedTouchesLength = e.changedTouches.length
+				ev.changedTouchesLength = e.changedTouches.length;
 				ev.target = touch.listeners.findTarget(e);
 			}
 		} else {	/*if more than one finger has been touching and all have been removed at once*/
@@ -546,32 +547,32 @@ touch.core = {
 				ev.speedY = touch.vars.speed.Y;
 				x = Math.abs(vars.xPos[id][0] - vars.xPosNow[id]);
 				y = Math.abs(vars.yPos[id][0] - vars.yPosNow[id]);
-				ev.changedTouchesLength = e.changedTouches.length
+				ev.changedTouchesLength = e.changedTouches.length;
 				ev.target = touch.listeners.findTarget(e);
 			}
 		}
 
-		if (e.touches.length == 0 && cT.length <= 1) {
+		if (e.touches.length === 0 && cT.length <= 1) {
 			if(touch.listeners[ev.target].endA.length === 1) {
 				if (x > xLimit && y > yLimit) {					/*2d swipe*/
 					//console.log("2d");
 					funcs[ev.target].endA[0].twoD(ev);
-					if(vars.addMomentum == false) 
+					if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 				} else if (x < xLimit && y >= yLimit) {			/*Vertical swipe*/
 					//console.log("Vert");
 					funcs[ev.target].endA[0].vertical(ev);
-					if(vars.addMomentum == false) 
+					if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 				} else if (x >= xLimit && y < yLimit) {			/*horizontal swipe*/
 					//console.log("Hori");
 					funcs[ev.target].endA[0].horizontal(ev);
-					if(vars.addMomentum == false) 
+					if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 				} else {										/*click*/
 					//console.log("click");
 					funcs[ev.target].endA[0].click(ev);
-					if(vars.addMomentum == false) 
+					if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 				}
 			} else {
@@ -579,29 +580,29 @@ touch.core = {
 					if (x > xLimit && y > yLimit) {					/*2d swipe*/
 						//console.log("2d");
 						funcs[ev.target].endA[i].twoD(ev);
-						if(vars.addMomentum == false) 
+						if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 					} else if (x < xLimit && y >= yLimit) {			/*Vertical swipe*/
 						//console.log("Vert");
 						funcs[ev.target].endA[i].vertical(ev);
-						if(vars.addMomentum == false) 
+						if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 					} else if (x >= xLimit && y < yLimit) {			/*horizontal swipe*/
 						//console.log("Hori");
 						funcs[ev.target].endA[i].horizontal(ev);
-						if(vars.addMomentum == false) 
+						if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 					} else {										/*click*/
 						//console.log("click");
 						funcs[ev.target].endA[i].click(ev);
-						if(vars.addMomentum == false) 
+						if(vars.addMomentum === false)
 						vars.deleteFingerInfo(e);
 					}
 				}
 			}
 		} else {
 			funcs[target].multiendA[0](e);
-			if(vars.addMomentum == false) 
+			if(vars.addMomentum === false)
 				vars.deleteFingerInfo(e);
 		}
 	},
@@ -631,7 +632,7 @@ touch.core = {
 			timeDiff = (tS[id][max] - tS[id][max - 4])/20;
 			movementX = xP[id][max] - xP[id][max - 4];
 			movementY = yP[id][max] - yP[id][max - 4];
-			speed.X = parseFloat((movementX / timeDiff).toFixed(10));		
+			speed.X = parseFloat((movementX / timeDiff).toFixed(10));
 			speed.Y = parseFloat((movementY / timeDiff).toFixed(10));
 		}
 
@@ -675,7 +676,6 @@ touch.core = {
 		}*/
 
 		function innerMomentum(e) {
-			"use strict";
 			//console.log("innerMomentum");
 			var	xFriction = touch.options.xFriction,
 			yFriction = touch.options.yFriction,
@@ -684,13 +684,12 @@ touch.core = {
 			last;
 
 			for (var i in e.xPos) {
-    			if (e.xPos.hasOwnProperty(i) && typeof(i) !== 'function') {
-        			id = i;
-        			last = e.xPos[id].length - 1;
-        			break;
-    			}
+				if (e.xPos.hasOwnProperty(i) && typeof(i) !== 'function') {
+					id = i;
+					last = e.xPos[id].length - 1;
+					break;
+				}
 			}
-
 			switch (true) {
 				case touch.vars.isTouching == (1 || 2):
 					delete touch.vars.timeStamps[id];
