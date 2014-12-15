@@ -1,818 +1,555 @@
-(function(touchIdentifier){
-
-var touch = {};
-
-touch.invoke = function (element, obj) {
-	var o = touch,
-		core = o.core,
-		vars = o.vars,
-		funcs = o.funcs,
-		listeners = o.listeners,
-		el = core.setTarget(element),
-		e, i, j, h, temp,
-		place = 0;
-
-	vars.addMomentum = obj.addMomentum || false;
-	/*deals with the functions or objects passed to the invoke method*/
-	funcs.start = obj.start || funcs.start;
-	funcs.multitouch = obj.multitouch || funcs.multitouch;
-	funcs.multiend = obj.multiend ||funcs.multiend;
-	funcs.momentum = obj.momentum || funcs.momentum;
-
-	for(i in o.funcs) {
-		if (obj.types[0] === 'all' && i == 'end') {
-			if (typeof obj.end == 'function') {
-				funcs[i] = {
-					click: obj.end,
-					horizontal: obj.end,
-					vertical: obj.end,
-					twoD: obj.end
-				};
-				obj.end = o.funcs[i];
-			} else if (typeof obj.end == 'object') {
-				funcs[i] = {
-					click: obj.end.click || funcs.end.click,
-					horizontal: obj.end.horizontal || funcs.end.horizontal,
-					vertical: obj.end.vertical || funcs.end.vertical,
-					twoD: obj.end.twoD || funcs.end.twoD
-				};
-			} else {
-				funcs[i] = funcs[i];
-			}
-		} else if (obj.types[0] === 'all' && i == 'move') {
-			if (typeof obj.move == 'function') {
-				funcs[i] = {
-					horizontal: obj.move,
-					vertical:  obj.move,
-					twoD:  obj.move
-				};
-				obj.move = o.funcs[i];
-			} else if (typeof obj.move == 'object') {
-				funcs[i] = {
-					click: obj.move.click || funcs.move.click,
-					horizontal:obj.move.horizontal || funcs.move.horizontal,
-					vertical: obj.move.vertical || funcs.move.vertical,
-					twoD: obj.move.twoD || funcs.move.twoD
-				};
-			} else {
-				funcs[i] = funcs[i];
-			}
-		}else if(obj.types.length >= 1 && i == 'move') {
-			for(j = obj.types.length - 1; j >= 0; j --) {
-				funcs[i][obj.types[j]] = obj.move;
-			}
-		} else if(obj.types.length >= 1 && 'end') {
-			for(j = obj.types.length - 1; j >= 0; j --) {
-				funcs[i][obj.types[j]] = obj.end;
-			}
-		} else if (obj.types === undefined || typeof obj.types !== "object" || (typeof obj.types === "object" && obj.types[0] === undefined)) {
-			console.log('Check the types array in your invocation object');
+(function(){
+	var touchInfo = {};
+	var mousedown = false;
+	var isTouching = false;
+	var passTouch = function(e) {
+		if(!/ip(ad|hone|od)/i.test(navigator.userAgent) && e.preventDefault && e.type === 'touchmove') {
+			e.preventDefault();
 		}
-	}
+		isTouching = true;
+		touchBase.touching.call(touchBase, e);
+	};
+	var passTouchEnd = function(e) {
+		touchBase.touchEnd.call(touchBase, e);
+		isTouching = true;
+	};
+	var passMouseDown = function(e) {
+		if(isTouching) {
+			return;
+		}
+		mousedown = true;
+		e['touches'] = [e];
+		touchBase.touching.call(touchBase, e);
+	};
+	var passMouseMove = function(e) {
+		if(mousedown && !isTouching) {
+			e['touches'] = [e];
+			touchBase.touching.call(touchBase, e);
+		}
+	};
 
-	if(typeof el === 'string' || el[0] == 'undefined') {
-		console.log('event listeners not set - your element "' + el + '" was not a valid CSS class or ID selector');
-	} else if (typeof el === 'object' && el.length === undefined) {
-		if (typeof listeners[el.id] == 'undefined') {
-			el.addEventListener('touchstart', function(e){
-				core.touchStart(e);
-			});
-			el.addEventListener('touchmove', function(e){
-				core.touchMove(e);
-			});
-			el.addEventListener('touchend', function(e){
-				core.touchEnd(e);
-			});
-			
-			listeners[el.id] = {
-				start: funcs.start,
-				move: funcs.move,
-				end: funcs.end,
-				multitouch: funcs.multitouch,
-				multiend: funcs.multiend,
-				startA: [],
-				moveA: [],
-				endA: [],
-				multitouchA: [],
-				multiendA: []
-			};
+	var passMouseOut = function(e) {
+		if(mousedown && e.toElement === null && !isTouching) {
+			mousedown = false;
+			e['touches'] = [e];
+			touchBase.touchEnd.call(touchBase, e);
+		}
+	};
 
-			console.log('event listeners set on element "' + el.id +'"');
-			listeners[el.id].startA.push(funcs.start);
-			listeners[el.id].moveA.push(funcs.move);
-			listeners[el.id].endA.push(funcs.end);
-			listeners[el.id].multitouchA.push(funcs.multitouch);
-			listeners[el.id].multiendA.push(funcs.multiend);
-		} else if (typeof el === 'object' && el.length >= 1) {
-			for (i = 0; i < el.length; i++) {
-				console.log('event listener set on element No. '+i+' of class "' + el[i].className + '"');
-				el[i].addEventListener('touchstart', function(e){
-					core.touchStart(e);
-				});
-				el[i].addEventListener('touchmove', function(e){
-					core.touchMove(e);
-				});
-				el[i].addEventListener('touchend', function(e){
-					core.touchEnd(e);
-				});
+	var passMouseUp = function(e) {
+		mousedown = false;
+		e['touches'] = [];
+		touchBase.touchEnd.call(touchBase, e);
+	};
+	var pointerStart = function(e) {
+		if(e.isPrimary) {
+			pointerTouches = [];
+			touchInfo.singleSwipe = undefined;
+			touchInfo.doubleSwipe = undefined;
+			touchBase.maxTouches = 0;
+		}
+		pointerTouches.push({
+			'pointerId': e['pointerId'],
+			'target': e.target,
+			'pageX': e.pageX,
+			'pageY': e.pageY,
+			'clientX': e.clientX,
+			'clientY': e.clientY,
+			'screenX': e.screenX,
+			'screenY': e.screenY,
+			'offsetX': e.offsetX,
+			'offsetY': e.offsetY,
+			'layerX': e.layerX,
+			'layerY': e.layerY,
+			'x': e.x,
+			'y': e.y,
+			'originalEvent': e
+		});
+		e.touches = pointerTouches;
+		touchBase.touching.call(touchBase, e);
+	};
+	var pointerMove = function(e){
+		var i = pointerTouches.length;
+		var match = false;
+		var pointerId = e['pointerId'];
+		while(i--) {
+			if(pointerTouches[i]['pointerId'] == pointerId) {
+				pointerTouches[i] = {
+					'pointerId': e['pointerId'],
+					'target': e.target,
+					'pageX': e.pageX,
+					'pageY': e.pageY,
+					'clientX': e.clientX,
+					'clientY': e.clientY,
+					'screenX': e.screenX,
+					'screenY': e.screenY,
+					'offsetX': e.offsetX,
+					'offsetY': e.offsetY,
+					'layerX': e.layerX,
+					'layerY': e.layerY,
+					'x': e.x,
+					'y': e.y,
+					'originalEvent': e
+				}
+				match = true;
+				break;
 			}
-		} else {
-			console.log("There are event listeners already set on this element - checking for duplicates and conflicts......");
-			for (i in listeners[el.id]) {
-				if(typeof listeners[el.id][i] == 'function') {
-					if (!obj[i]) {
-						continue;
+			if(pointerTouches[i]['isPrimary'] && e['isPrimary'] && pointerTouches[i]['pointerId'] !== pointerId) {
+				pointerTouches = [];
+				match = false;
+				touchInfo.singleSwipe = undefined;
+				touchInfo.doubleSwipe = undefined;
+				touchBase.maxTouches = 0;
+				break;
+			}
+		}
+		if(!match) {
+			if(e['isPrimary']) {
+				pointerTouches = [];
+			}
+
+			// this below was causing the touch api to always think we were touching the screen
+			// only commented out for now - can't see that I would have put it in without
+			// a reason in the first place!?
+
+			// pointerTouches.push({
+			//     pointerId: e.pointerId,
+			//     target: e.target,
+			//     pageX: e.pageX,
+			//     pageY: e.pageY,
+			//     clientX: e.clientX,
+			//     clientY: e.clientY,
+			//     screenX: e.screenX,
+			//     screenY: e.screenY,
+			//     offsetX: e.offsetX,
+			//     offsetY: e.offsetY,
+			//     layerX: e.layerX,
+			//     layerY: e.layerY,
+			//     x: e.x,
+			//     y: e.y,
+			//     originalEvent: e
+			// });
+		}
+		e['touches'] = pointerTouches;
+		touchBase.touching.call(touchBase, e);
+	};
+	var lastPointerOut = {};
+	var lastMouseOut = {};
+	var pointerEnd = function(e) {
+		var i = pointerTouches.length;
+		while(i--) {
+			if(pointerTouches[i]['pointerId'] == e['pointerId']) {
+				pointerTouches.splice(i, 1);
+				break;
+			}
+		}
+		e['touches'] = pointerTouches;
+		touchBase.touchEnd.call(touchBase, e);
+	};
+	var pointerOut = function(e) {
+		if(e.type==='mouseout' && e.toElement === null && e.relatedTarget === null) {
+			lastMouseOut = {
+				'clientX': e.clientX,
+				'clientY': e.clientY
+			}
+			if(e.clientX === lastPointerOut.clientX && e.clientY === lastPointerOut.clientY && ((e.pageX <= 0 || e.pageX >= window.innerWidth) || (e.pageY <= 0 || e.pageY >= window.innerHeight))) {
+				pointerEnd(lastPointerOut.e);
+			}
+		} else if (/pointerout/i.test(e.type)) {
+			lastPointerOut = {
+				'e': e,
+				'pointerId': e['pointerId'],
+				'clientX': e.clientX,
+				'clientY': e.clientY
+			}
+		}
+	};
+	var pointerTouches = [];
+	var touchBase = {
+		isTouchable: typeof window['ontouchstart'] !== 'undefined' || window.navigator['msPointerEnabled'] === true,
+		msPointerEnabled: (window.navigator['msPointerEnabled'] === true || window.navigator['pointerEnabled']),
+		xThreshold: 20,
+		yThreshold: 20,
+		xEndThreshold: 40,
+		yEndThreshold: 40,
+		dThreshold: 25,
+		pThreshold: 15,
+		gradThreshold: 3,
+		maxTouches: 0,
+		dispatchEvent: function(type, info, e) {
+			var touchEvent;
+			var i = type.length;
+			info['originalEvent'] = e;
+			info['preventDefault'] = e['preventDefault'];
+			info['cancelBubble'] = e['cancelBubble'];
+			while (i--) {
+				touchEvent = document.createEvent('HTMLEvents');
+
+				for (var j in info) {
+					if(/(x|y)displacement$/i.test(j)) {
+						touchEvent[j] = 0 - info[j];
 					} else {
-						for (h = listeners[el.id][i + 'A'].length - 1; h >= 0; h--) {
-							if (listeners[el.id][i + 'A'][h].toString() == obj[i].toString()) { /*Need to compare functions as string to ensure matching works*/
-								console.log('    Attempt to apply duplicate ' + i + ' function to "' + el.id + '" - Duplicate event listener not set');
-								funcs[i] = listeners[el.id][i];
-							} else {
-								/*augment function object to add new function to the element*/
-								listeners[el.id][i + 'A'].push(obj[i]);
-							}
-						}
-					}
-				} else if (typeof listeners[el.id][i] == 'object') {
-					if (!obj[i]) {
-						continue;
-					} else {
-						console.log('\n    Attempt to apply ' + i + ' object to an existing event listener. Checking if functions within the object are duplicates......');
-						place = listeners[el.id][i + 'A'].length;
-					for (j in listeners[el.id][i]) {
-						if(listeners[el.id][i][j].toString() == obj[i][j].toString()) { /*Need toString to compare functions to ensure matching works*/
-							console.log('        Attempt to apply duplicate ' + j + ' function to ' + i + ' object function to "' + el.id + '" - Duplicate event listener not set');
-							funcs[i][j] = listeners[el.id][i][j];
-						} else {
-							console.log('        No duplicate ' + j + ' function detected in ' + i + ' object on element "'+ el.id + '"  (there may now be two different ' + i + ' functions assigned)');
-							/*augment function object to add new function to the element*/
-							listeners[el.id][i + 'A'][place] = obj[i];
-						}
+						touchEvent[j] = info[j];
 					}
 				}
+
+				touchEvent.initEvent(type[i], true, true);
+				e.target.dispatchEvent(touchEvent);
 			}
-		}
-	}
-}
+		},
 
-touch.funcs = {
-	start: function(e) {console.log('No Start Function Set');},
-	move: {
-		click: function(e) {console.log('No touch hold move functions set');},
-		horizontal: function(e) {console.log('No horizontal move functions set');},
-		vertical: function(e) {console.log('No vertical move functions set');},
-		twoD: function(e) {console.log('No 2D move functions set');}
-	},
-	end: {
-		click: function(e) {console.log('No click touch functions set');},
-		horizontal: function(e) {console.log('No horizontal end functions set');},
-		vertical: function(e) {console.log('No vertical end functions set');},
-		twoD: function(e) {console.log('No 2D end functions set');}
-	},
-	multitouch: function(e) {console.log('No multitouch function set');},
-	multiend: function(e) {console.log('No multitouch end function set');},
-	momentum: function(e) {console.log('No momentum function set');}
-};
+		overLimit: function(change, limit) {
+			return Math.abs(change) > limit;
+		},
 
-touch.listeners = {
-	findTarget: function(e) {
-		var o = this,
-		eT = e.target,
-		targetClass = eT.className,
-		targetID = eT.id,
-		target = "",
-		i;
+		gradCheck: function(grad, swipeDir) {
+			grad = Math.abs(grad);
+			return swipeDir === 'v' ? grad > this.gradThreshold : grad < (1/this.gradThreshold);
+		},
 
-		for (i in o) {
-			if (i == eT.id) {
-				target = eT.id;
-			} else if (i == eT.className) {
-				target= eT.className;
-			} else if (i != eT.id || i != eT.className) {
-				if (i == eT.parentElement.id) {
-					target = eT.parentElement.id;
-				} else if (i == eT.parentElement.className) {
-					target= eT.parentElement.className;
-				} else if (i != eT.parentElement.id || i != eT.parentElement.className) {
-					if (i == eT.parentElement.parentElement.id) {
-						target = eT.parentElement.parentElement.id;
-					} else if (i == eT.parentElement.parentElement.className) {
-						target= eT.parentElement.parentElement.className;
-					}
+		touching: function(e) {
+			var o = this;
+			var focus = o.getTouchInfo(e['touches']);
+			var events = [];
+
+			if (focus) {
+				events = o.checkForEvents(focus);
+				o.dispatchEvent(events, focus, e);
+			}
+
+			if (events.length > 1) {
+				focus['xDisplacement'] = focus['startCenterX'] - focus['centerX'];
+				focus['yDisplacement'] = focus['startCenterY'] - focus['centerY'];
+				focus['xTravelDistance'] += Math.abs(focus['lastEvent']['centerX'] - focus['centerX']);
+				focus['yTravelDistance'] += Math.abs(focus['lastEvent']['centerY'] - focus['centerY']);
+				focus['lastEvent']['distance'] = focus['distance'];
+
+				//reassign
+				focus['lastEvent']['fingers'][0]['y'] = focus['fingers'][0]['y'];
+				focus['lastEvent']['fingers'][0]['x'] = focus['fingers'][0]['x'];
+				focus['lastEvent']['centerY'] = focus['centerY'];
+				focus['lastEvent']['centerX'] = focus['centerX'];
+				focus['lastEvent']['distance'] = focus['distance'];
+				if (focus['fingers'][1]) {
+					focus['lastEvent']['fingers'][1]['y'] = focus['fingers'][1]['y'];
+					focus['lastEvent']['fingers'][1]['x'] = focus['fingers'][1]['x'];
 				}
 			}
-		}
-		return target;
-	}
-};
+		},
 
-touch.vars = {		/*core variables*/
-	timeStamps: {},
-	xPos: {},
-	yPos: {},
-	xPosNow: {},
-	yPosNow: {},
-	speed: {},
-	dispX: {},
-	dispY: {},
-	isTouching: 0,
-	e: {},
-	deleteFingerInfo: function(e) {
-		var len = e.changedTouches.length - 1,
-		id;
+		getTouchInfo: function(touches) {
+			var o = this;
+			var focus, one, two;
 
-		for (i = len; i >= 0; i--) {
-			id = e.changedTouches[i].identifier;
-			delete touch.vars.timeStamps[id];
-			delete touch.vars.xPos[id];
-			delete touch.vars.xPosNow[id];
-			delete touch.vars.yPos[id];
-			delete touch.vars.yPosNow[id];
-		}
-	}
-};
+			this.maxTouches = Math.max(touches.length, this.maxTouches);
+			if (o.maxTouches === 1) {
 
-touch.options = {
-	xFriction: 0.05,
-	yFriction: 0.05,
-	xMovThreshold: 20,
-	yMovThreshold: 20
-};
+				focus = touchInfo.singleSwipe = touchInfo.singleSwipe || {
+					'fingers': [{
+						'startX': touches[0].pageX,
+						'startY': touches[0].pageY
+					}],
+					'lastEvent': {
+						'fingers': [{
+							'x': touches[0].pageX,
+							'y': touches[0].pageY
+						}]
+					}
+				};
 
-touch.getFingerIDs = function() {
-	"use strict";
-	//console.log("getFingerIDs");
-	var xP = touch.vars.xPos,
-	id = [],
-	i;
+				one = focus['fingers'][0];
+				focus['centerX'] = one.x = touches[0].pageX;
+				focus['centerY'] = one.y = touches[0].pageY;
+				focus['distance'] = focus['startDistance'] = focus['lastEvent']['distance'] = 0;
+				if (focus['startCenterX'] === undefined) {
+					focus['lastEvent']['centerX'] = focus['startCenterX'] = focus['centerX'];
+					focus['lastEvent']['centerY'] = focus['startCenterY'] = focus['centerY'];
+					focus['lastEvent']['distance'] = focus['startDistance'] = focus['distance'];
+					focus['xDisplacement'] = 0;
+					focus['yDisplacement'] = 0;
+					focus['xTravelDistance'] = 0;
+					focus['yTravelDistance'] = 0;
+				}
 
-	for (i in xP) {
-		if (xP.hasOwnProperty(i) && typeof(i) !== 'function') {
-			id.push(i);
-		}
-	}
-	id.sort(function(a,b){return b-a;});
-	return id;
-};
-touch.core = {
-	setTarget: function (el) {
-		"use strict";
-		if (el.charAt(0) === "#") {
-			el = document.querySelectorAll(el)[0];
-		} else if (el.charAt(0) === ".") {
-			el = document.querySelectorAll(el);
-		} else {
-			el = el;
-		}
-		return el;
-	},
-	touchStart: function(e) {
-		"use strict";
-		//console.log('touchStart');
-		var vars = touch.vars,
-		ev = touch.vars.e,
-		id = 0,
-		listeners = touch.listeners,
-		target = listeners.findTarget(e),
-		i;
+			} else if (o.maxTouches === 2 && touches.length === 2) {
 
-		e.preventDefault();
-		e.stopPropagation();
-		vars.isTouching = 1;
+				focus = touchInfo.doubleSwipe = touchInfo.doubleSwipe || {
+					'fingers': [{
+						'startX': touches[0].pageX,
+						'startY': touches[0].pageY
+					}, {
+						'startX': touches[1].pageX,
+						'startY': touches[1].pageY
+					}],
+					'lastEvent': {
+						'fingers': [{
+							'x': touches[0].pageX,
+							'y': touches[0].pageY
+						}, {
+							'x': touches[1].pageX,
+							'y': touches[1].pageY
+						}]
+					}
+				};
 
-		for (i = 0; i < e.touches.length; i++) {
-			id = e.touches[i].identifier;
-			vars.xPos[id] = [e.touches[i].clientX];
-			vars.yPos[id] = [e.touches[i].clientY];
-			vars.timeStamps[id] = [e.timeStamp];
-			//console.log(target)
-			//console.log('finger ' + id + ' touchStart @ X: ' +vars.xPos[id][0] + '  Y: ' + vars.yPos[id][0]);
-		}
+				one = focus['fingers'][0];
+				two = focus['fingers'][1];
 
-		ev.systemInfo = e;
-		ev.ids = touch.getFingerIDs(e);
-		ev.xPos = vars.xPos;
-		ev.yPos = vars.yPos;
-		ev.timeStamps = vars.timeStamps;
-		ev.touchesLength = e.touches.length;
-		ev.changedTouchesLength = e.changedTouches.length;
+				one.x = touches[0].pageX;
+				one.y = touches[0].pageY;
+				two.x = touches[1].pageX;
+				two.y = touches[1].pageY;
 
-		if(listeners[target].startA.length == 1) {
-			listeners[target].startA[0](ev);
-		} else {
-			for (i = listeners[target].startA.length - 1; i >= 0; i--) {
-				listeners[target].startA[i](ev);
+				focus['centerX'] = one.x + ((one.x - two.x) / 2);
+				focus['centerY'] = one.y + ((one.y - two.y) / 2);
+				focus['distance'] = Math.sqrt(((one.x - two.x) * (one.x - two.x)) + ((one.y - two.y) * (one.y - two.y)));
+
+				if (focus['startCenterX'] === undefined) {
+					focus['lastEvent']['centerX'] = focus['startCenterX'] = focus['centerX'];
+					focus['lastEvent']['centerY'] = focus['startCenterY'] = focus['centerY'];
+					focus['lastEvent']['distance'] = focus['startDistance'] = focus['distance'];
+					focus['xDisplacement'] = 0;
+					focus['yDisplacement'] = 0;
+					focus['xTravelDistance'] = 0;
+					focus['yTravelDistance'] = 0;
+				}
 			}
-		}
-	},
-	touchMove: function(e) {
-		"use strict";
-		//console.log("touchMove");
-		var tVars = touch.vars,
-		ev = touch.vars.e,
-		xP = tVars.xPos,
-		yP = tVars.yPos,
-		xPN = tVars.xPosNow,
-		yPN = tVars.yPosNow,
-		v = touch.vars,
-		cT = e.changedTouches,
-		len = cT.length - 1,
-		i, id, target,
-		listeners = touch.listeners,
-		xLimit = touch.options.xMovThreshold,
-		yLimit = touch.options.yMovThreshold,
-		funcs = touch.listeners,
-		x = 0,
-		y = 0,
-		tS = tVars.timeStamps;
+			return focus;
+		},
 
-		e.preventDefault();
-		e.stopPropagation();
+		checkForEvents: function(focus) {
+			var o = this;
+			var eventType = [];
+			var chiny = 0;
+			var chinx = 0;
+			var chinDist = 0;
+			var gradient = 0;
+			var one = focus['fingers'][0];
+			var two;
 
-		/*loop through changed touches and add new values to the id of each occurrence*/
-		for (i = len; i >= 0; i--) {
-			id = cT[i].identifier;
-			xP[id].push(cT[i].clientX);
-			yP[id].push(cT[i].clientY);
-			xPN[id] = cT[i].clientX;
-			yPN[id] = cT[i].clientY;
-			tVars.timeStamps[id].push(e.timeStamp);
-			v.dispX[id] = xPN[id]- xP[id][0];
-			v.dispY[id] = yPN[id]- yP[id][0];
-			//console.log('Finger ' + id + ' moved to X:' + cT[i].clientX + ' Y:' + cT[i].clientY);
-		}
+			if (o.maxTouches === 1) {
+				chiny = focus['lastEvent']['fingers'][0].y - one.y;
+				chinx = focus['lastEvent']['fingers'][0].x - one.x;
+				gradient = chiny / chinx;
+				if (o.overLimit(chiny, o.yThreshold) && o.gradCheck(gradient, 'v')) {
+					eventType.push(chiny > 0 ? 'swipingUp' : 'swipingDown');
+				} else if (o.overLimit(chinx, o.xThreshold) && o.gradCheck(gradient, 'h')) {
+					eventType.push(chinx > 0 ? 'swipingLeft' : 'swipingRight');
+				}
+				if (one.y !== focus['startCenterY'] || one.x !== focus['startCenterX']) {
+					eventType.push('swiping');
+				}
 
-		ev.systemInfo = e;
-		ev.displacementX = v.dispX;
-		ev.displacementY = v.dispY;
-		ev.ids = touch.getFingerIDs(e);
-		ev.xPos = xP;
-		ev.yPos = yP;
-		ev.timeStamps = tVars.timeStamps;
-		ev.xPosNow = xPN;
-		ev.yPosNow = yPN;
-		ev.touchesLength = e.touches.length;
-		ev.changedTouchesLength = e.changedTouches.length;
+			} else if (o.maxTouches === 2) {
+				two = focus['fingers'][1] ? focus['fingers'][1] : null;
 
-		if (e.touches.length == 1) {
-			x = Math.abs(xP[id][0] - xPN[id]);
-			y = Math.abs(yP[id][0] - yPN[id]);
-			target = touch.listeners.findTarget(e);
-			if (touch.listeners[target].move.length === 1) {
-				if (x > xLimit && y > yLimit) {		/*2d swipe*/
-					//console.log("2d");
-					funcs[target].move[0].twoD(ev);
+				chinDist = focus['lastEvent']['distance'] - focus['distance'];
+
+				if (o.overLimit(chinDist, o.pThreshold)) {
+					eventType.push(chinDist < 0 ? 'pinchingOut' : 'pinchingIn');
+					focus['pinched'] = true;
 				} else {
-					if (x < xLimit && y >= yLimit) {			/*vertical swipe*/
-						//console.log("Vert");
-						funcs[target].move[0].vertical(ev);
-					} else if (x >= xLimit && y < yLimit) {			/*horizontal swipe*/
-						//console.log("Hori");
-						funcs[target].move[0].horizontal(ev);
+					chiny = focus['lastEvent']['centerY'] - focus['centerY'];
+					chinx = focus['lastEvent']['centerX'] - focus['centerX'];
+					gradient = chiny / chinx;
+				}
+
+				if (focus['pinched']) {
+					eventType.push('pinching');
+				}
+
+				if (!focus['pinched']) {
+					if (o.overLimit(chiny, o.yThreshold) && o.gradCheck(gradient, 'v')) {
+						focus['dragged'] = true;
+						eventType.push(chiny > 0 ? 'draggingUp' : 'draggingDown');
+					} else if (o.overLimit(chinx, o.xThreshold) && o.gradCheck(gradient, 'h')) {
+						focus['dragged'] = true;
+						eventType.push(chinx > 0 ? 'draggingLeft' : 'draggingRight');
+					}
+					if (o.overLimit((Math.sqrt((chiny*chiny) + (chinx*chinx))), o.dThreshold)) {
+						eventType.push('dragging');
+					}
+				}
+			}
+			return eventType;
+
+		},
+
+		touchEnd: function(e) {
+			var o = this;
+			var focus;
+			var chiny = 0;
+			var chinx = 0;
+			var gradient = 0;
+			var chinDist = 0;
+			var xDispVsDist = 0;
+			var yDispVsDist = 0;
+			var singleDirection = true;
+			var gestured = false;
+			var reset = function() {
+				o.maxTouches = 0;
+				touchInfo.singleSwipe = undefined;
+				touchInfo.doubleSwipe = undefined;
+			};
+			var eventType = [];
+
+			if (o.maxTouches === 1 && e.touches.length === 0) {
+				focus = touchInfo.singleSwipe;
+
+				focus['xDisplacement'] = focus['startCenterX'] - focus['centerX'];
+				focus['yDisplacement'] = focus['startCenterY'] - focus['centerY'];
+				focus['xTravelDistance'] += Math.abs(focus['lastEvent']['centerX'] - focus['centerX']);
+				focus['yTravelDistance'] += Math.abs(focus['lastEvent']['centerY'] - focus['centerY']);
+				xDispVsDist = Math.abs(focus['xDisplacement']) - focus['xTravelDistance'];
+				yDispVsDist = Math.abs(focus['yDisplacement']) - focus['yTravelDistance'];
+
+				chiny = focus['fingers'][0]['startY'] - focus['fingers'][0]['y'];
+				chinx = focus['fingers'][0]['startX'] - focus['fingers'][0]['x'];
+
+				gradient = chiny / chinx;
+
+				singleDirection = !(o.overLimit(yDispVsDist, o.yEndThreshold) || o.overLimit(xDispVsDist, o.xEndThreshold));
+
+				if (o.overLimit(chiny, o.yThreshold) && o.gradCheck(gradient, 'v') && !o.overLimit(yDispVsDist, o.yThreshold) && singleDirection) {
+					eventType.push(chiny > 0 ? 'swipeUp' : 'swipeDown');
+				} else if (o.overLimit(chinx, o.xThreshold) && o.gradCheck(gradient, 'h') && !o.overLimit(xDispVsDist, o.xThreshold) && singleDirection) {
+					eventType.push(chinx > 0 ? 'swipeLeft' : 'swipeRight');
+				} else if (!o.overLimit(chiny, o.yThreshold) && !o.overLimit(chinx, o.xThreshold)) {
+					eventType.push('tap');
+				}
+
+				if(eventType[0] !== 'tap') {
+					eventType.push('swipe');
+				}
+
+			} else if (o.maxTouches === 2 && e.touches.length === 0) {
+				focus = touchInfo.doubleSwipe;
+				chinDist = focus['startDistance'] - focus['distance'];
+
+				focus['xDisplacement'] = focus['startCenterX'] - focus['centerX'];
+				focus['yDisplacement'] = focus['startCenterY'] - focus['centerY'];
+				focus['xTravelDistance'] += Math.abs(focus['lastEvent']['centerX'] - focus['centerX']);
+				focus['yTravelDistance'] += Math.abs(focus['lastEvent']['centerY'] - focus['centerY']);
+				xDispVsDist = Math.abs(focus['xDisplacement']) - focus['xTravelDistance'];
+				yDispVsDist = Math.abs(focus['yDisplacement']) - focus['yTravelDistance'];
+
+				singleDirection = !(o.overLimit(yDispVsDist, o.yEndThreshold) || o.overLimit(xDispVsDist, o.xEndThreshold));
+
+				if (o.overLimit(chinDist, o.pThreshold)) {
+					eventType.push(chinDist < 0 ? 'pinchOut' : 'pinchIn');
+					gestured = true;
+				} else {
+					chiny = focus['startCenterY'] - focus['centerY'];
+					chinx = focus['startCenterX'] - focus['centerX'];
+					gradient = chiny / chinx;
+				}
+
+				if (!gestured) {
+					if (o.overLimit(chiny, o.yThreshold) && o.gradCheck(gradient, 'v') && singleDirection) {
+						eventType.push(chiny > 0 ? 'dragUp' : 'dragDown');
+					} else if (o.overLimit(chinx, o.xThreshold) && o.gradCheck(gradient, 'h') && singleDirection) {
+						eventType.push(chinx > 0 ? 'dragLeft' : 'dragRight');
+					}
+
+					if(!o.overLimit(chiny, o.yThreshold) && !o.overLimit(chinx, o.xThreshold)) {
+						eventType.push('twoTap');
 					} else {
-						//console.log("click");
-						/*click - do nothing*/
+						eventType.push('drag');
 					}
 				}
-			} else {
-				for (i = touch.listeners[target].moveA.length - 1; i >=0; i--) {
-					if (x > xLimit && y > yLimit) {		/*2d swipe*/
-						//console.log("2d");
-						touch.listeners[target].moveA[i].twoD(ev);
+			}
+
+			if (eventType.length) {
+				o.dispatchEvent(eventType, focus, e);
+			}
+			if(e['touches'].length === 0) {
+				reset();
+			}
+		},
+
+		changeTouchBase: function(newBase){
+			var needsMSprefix;
+			if(this.isTouchable) {
+				if(this.msPointerEnabled) {
+					needsMSprefix = typeof window['onpointercancel'] === 'undefined';
+					if(this.oldBase) {
+						this.oldBase.removeEventListener(needsMSprefix ? 'MSPointerDown' : 'pointerdown', pointerStart, false);
+						this.oldBase.removeEventListener(needsMSprefix ? 'MSPointerMove' : 'pointermove', pointerMove, false);
+						this.oldBase.removeEventListener(needsMSprefix ? 'MSPointerUp' : 'pointerup', pointerEnd, false);
+						this.oldBase.removeEventListener(needsMSprefix ? 'MSPointerCancel' : 'pointercancel', pointerEnd, false);
+						this.oldBase.removeEventListener(needsMSprefix ? 'MSPointerOut' : 'pointerout', pointerEnd, false);
+						this.oldBase.removeEventListener('mouseout', pointerOut, false);
 					} else {
-						if (x < xLimit && y >= yLimit) {			/*vertical swipe*/
-							//console.log("Vert");
-							touch.listeners[target].moveA[i].vertical(ev);
-						} else if (x >= xLimit && y < yLimit) {			/*horizontal swipe*/
-							//console.log("Hori");
-							touch.listeners[target].moveA[i].horizontal(ev);
-						} else {
-							//console.log("click");
-							/*click - do nothing*/
-						}
+						this.oldBase = newBase;
 					}
-				}
-			}
-		} else {
-			touch.core.multitouch(ev);
-		}
-	},
-	multitouch: function(e) {
-		"use strict";
-		//console.log("multitouch");
-		var vars = touch.vars,
-		ev = touch.vars.ev,
-		startX = 0,
-		startY = 0,
-		start = 0,
-		currX = 0,
-		currY = 0,
-		now = 0,
-		i, id1, id2,
-		target = "HTMLElement",
-		len = 0,
-		max = 0,
-		xP = 0,
-		yP = 0;
-
-		e.preventDefault();
-		e.stopPropagation();
-		vars.isTouching = 2;
-
-		if (e.touches.length == 2) {
-			if (e.ids[0] < e.ids[1]) {	/*need this if/else statement as can't be sure what order the for/in loop (above) will run through the object*/
-				id1 = e.ids[0];
-				id2 = e.ids[1];
-				len = vars.xPos[id2].length - 1;
-				max = vars.xPos[id1].length - 1;
-			} else {
-				id1 = e.ids[1];
-				id2 = e.ids[0];
-				len = vars.xPos[id2].length - 1;
-				max = vars.xPos[id1].length - 1;
-			}
-			startX = vars.xPos[id1][max - len] - vars.xPos[id2][0];	/*calculates difference between the two fingers in x and y then uses pythag to get hypotenuse*/
-			startY = vars.yPos[id1][max - len] - vars.yPos[id2][0];
-			start = Math.sqrt(startX * startX + startY * startY);
-			currX = vars.xPos[id1][max] - vars.xPos[id2][len];
-			currY = vars.yPos[id1][max] - vars.yPos[id2][len];
-			now = Math.sqrt(currX * currX + currY * currY);
-			ev.difference = start - now;
-			//ev.target = touch.listeners.findTarget(e);
-		}
-
-		ev.systemInfo = e;
-		ev.ids = touch.getFingerIDs(e);
-		ev.xPos = xP;
-		ev.yPos = yP;
-		ev.timeStamps = vars.timeStamps;
-		ev.xPosNow = vars.xPosNow;
-		ev.yPosNow = vars.yPosNow;
-		ev.touchesLength = e.touches.length;
-		ev.changedTouchesLength = e.changedTouches.length;
-		ev.target = touch.listeners.findTarget(e);
-
-		if (touch.listeners[ev.target].multitouchA.length === 1) {
-			touch.listeners[ev.target].multitouchA[0](ev);
-		} else {
-			for (i = touch.listeners[target].multitouchA.length - 1; i >= 0; i--) {
-				touch.listeners[ev.target].multitouchA[i](ev);
-			}
-		}
-	},
-	touchEnd: function(e) {
-		"use strict";
-		var vars = touch.vars,
-		ev = touch.vars.e,
-		cT = e.changedTouches,
-		len = cT.length - 1,
-		id = [],
-		x = 0,
-		y = 0,
-		xLimit = touch.options.xMovThreshold,
-		yLimit = touch.options.yMovThreshold,
-		i,
-		target = "HTMLElement",
-		funcs = touch.listeners,
-		removed = [];
-
-		e.preventDefault();
-		e.stopPropagation();
-		vars.isTouching = 0;
-
-		for (i = len; i>= 0; i--) {
-			id = cT[i].identifier;
-			vars.timeStamps[id].push(e.timeStamp);
-			vars.xPos[id].push(cT[i].clientX);
-			vars.yPos[id].push(cT[i].clientY);
-			//console.log('Finger ' + id + ' removed from X:' + cT[i].clientX + ' Y:' + cT[i].clientY);
-		}
-
-		if(e.changedTouches.length > 0) {
-			for (i = e.changedTouches.length - 1; i >= 0; i--) {
-				removed.push(e.changedTouches[i].identifier);
-			}
-		}
-
-		if (e.touches.length === 0 && cT.length === 1) { //if one finger has been touching and is removed
-			id = cT[0].identifier;
-			ev.systemInfo = e;
-			ev.ids = touch.getFingerIDs(e);
-			ev.xPos = vars.xPos;
-			ev.yPos = vars.yPos;
-			ev.timeStamps = vars.timeStamps;
-			ev.xPosNow = vars.xPosNow;
-			ev.yPosNow = vars.yPosNow;
-			ev.touchesLength = e.touches.length;
-			ev.removedFingers = removed;
-			ev.speedX = touch.vars.speed.X;
-			ev.speedY = touch.vars.speed.Y;
-			x = Math.abs(vars.xPos[id][0] - vars.xPosNow[id]);
-			y = Math.abs(vars.yPos[id][0] - vars.yPosNow[id]);
-			ev.target = touch.listeners.findTarget(e);
-			ev.changedTouchesLength = e.changedTouches.length;
-			touch.core.getSpeed(ev);
-		} else if (cT.length >= 1 && e.touches.length > 0) {	/*if more than on finger is touching but not all fingers have been removed from the screen*/
-			for (i = len; i >= 0; i--) {
-				id = cT[i].identifier;
-				ev.systemInfo = e;
-				ev.ids = touch.getFingerIDs(e);
-				ev.xPos = vars.xPos;
-				ev.yPos = vars.yPos;
-				ev.timeStamps = vars.timeStamps;
-				ev.xPosNow = vars.xPosNow;
-				ev.yPosNow = vars.yPosNow;
-				ev.touchesLength = e.touches.length;
-				ev.removedFingers = removed;
-				ev.speedX = touch.vars.speed.X;
-				ev.speedY = touch.vars.speed.Y;
-				x = Math.abs(vars.xPos[id][0] - vars.xPosNow[id]);
-				y = Math.abs(vars.yPos[id][0] - vars.yPosNow[id]);
-				ev.changedTouchesLength = e.changedTouches.length;
-				ev.target = touch.listeners.findTarget(e);
-			}
-		} else {	/*if more than one finger has been touching and all have been removed at once*/
-			for (i = len; i >= 0; i--) {
-				id = cT[i].identifier;
-				ev.systemInfo = e;
-				ev.ids = touch.getFingerIDs(e);
-				ev.xPos = vars.xPos;
-				ev.yPos = vars.yPos;
-				ev.timeStamps = vars.timeStamps;
-				ev.xPosNow = vars.xPosNow;
-				ev.yPosNow = vars.yPosNow;
-				ev.touchesLength = e.touches.length;
-				ev.removedFingers = removed;
-				ev.speedX = touch.vars.speed.X;
-				ev.speedY = touch.vars.speed.Y;
-				x = Math.abs(vars.xPos[id][0] - vars.xPosNow[id]);
-				y = Math.abs(vars.yPos[id][0] - vars.yPosNow[id]);
-				ev.changedTouchesLength = e.changedTouches.length;
-				ev.target = touch.listeners.findTarget(e);
-			}
-		}
-
-		if (e.touches.length === 0 && cT.length <= 1) {
-			if(touch.listeners[ev.target].endA.length === 1) {
-				if (x > xLimit && y > yLimit) {					/*2d swipe*/
-					//console.log("2d");
-					funcs[ev.target].endA[0].twoD(ev);
-					if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-				} else if (x < xLimit && y >= yLimit) {			/*Vertical swipe*/
-					//console.log("Vert");
-					funcs[ev.target].endA[0].vertical(ev);
-					if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-				} else if (x >= xLimit && y < yLimit) {			/*horizontal swipe*/
-					//console.log("Hori");
-					funcs[ev.target].endA[0].horizontal(ev);
-					if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-				} else {										/*click*/
-					//console.log("click");
-					funcs[ev.target].endA[0].click(ev);
-					if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-				}
-			} else {
-				for (i = funcs[ev.target].endA.length - 1; i >= 0; i--) {
-					if (x > xLimit && y > yLimit) {					/*2d swipe*/
-						//console.log("2d");
-						funcs[ev.target].endA[i].twoD(ev);
-						if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-					} else if (x < xLimit && y >= yLimit) {			/*Vertical swipe*/
-						//console.log("Vert");
-						funcs[ev.target].endA[i].vertical(ev);
-						if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-					} else if (x >= xLimit && y < yLimit) {			/*horizontal swipe*/
-						//console.log("Hori");
-						funcs[ev.target].endA[i].horizontal(ev);
-						if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
-					} else {										/*click*/
-						//console.log("click");
-						funcs[ev.target].endA[i].click(ev);
-						if(vars.addMomentum === false)
-						vars.deleteFingerInfo(e);
+					newBase.addEventListener(needsMSprefix ? 'MSPointerDown' : 'pointerdown', pointerStart, false);
+					newBase.addEventListener(needsMSprefix ? 'MSPointerMove' : 'pointermove', pointerMove, false);
+					newBase.addEventListener(needsMSprefix ? 'MSPointerUp' : 'pointerup', pointerEnd, false);
+					newBase.addEventListener(needsMSprefix ? 'MSPointerCancel' : 'pointercancel', pointerEnd, false);
+					newBase.addEventListener(needsMSprefix ? 'MSPointerOut' : 'pointerout', pointerOut, false);
+					newBase.addEventListener('mouseout', pointerOut, false);
+				} else {
+					if(this.oldBase) {
+						this.oldBase.removeEventListener('touchstart', passTouch, false);
+						this.oldBase.removeEventListener('touchmove', passTouch, false);
+						this.oldBase.removeEventListener('touchend', passTouchEnd, false);
+						this.oldBase.removeEventListener('touchcancel', passTouchEnd, false);
+					} else {
+						this.oldBase = newBase;
 					}
+					newBase.addEventListener('touchstart', passTouch, false);
+					newBase.addEventListener('touchmove', passTouch, false);
+					newBase.addEventListener('touchend', passTouchEnd, false);
+					newBase.addEventListener('touchcancel', passTouchEnd, false);
 				}
 			}
-		} else {
-			funcs[target].multiendA[0](e);
-			if(vars.addMomentum === false)
-				vars.deleteFingerInfo(e);
-		}
-	},
-	getSpeed: function(e) {
-		"use strict";
-		//console.log("getSpeed");
-		var xP = e.xPos,
-		yP = e.yPos,
-		tS = e.timeStamps,
-		speed = touch.vars.speed,
-		timeDiff = 0,
-		movementX = 0,
-		movementY = 0,
-		max = 0,
-		id = e.systemInfo.changedTouches[0].identifier,
-		i;
-
-		max = xP[id].length - 1;
-
-		if (max <= 5) {
-			timeDiff = (tS[id][max] - tS[id][0])/20;
-			movementX = xP[id][max] - xP[id][0];
-			movementY = yP[id][max] - yP[id][0];
-			speed.X = parseFloat((movementX / timeDiff).toFixed(10));
-			speed.Y = parseFloat((movementY / timeDiff).toFixed(10));
-		} else {
-			timeDiff = (tS[id][max] - tS[id][max - 4])/20;
-			movementX = xP[id][max] - xP[id][max - 4];
-			movementY = yP[id][max] - yP[id][max - 4];
-			speed.X = parseFloat((movementX / timeDiff).toFixed(10));
-			speed.Y = parseFloat((movementY / timeDiff).toFixed(10));
-		}
-
-		if (touch.vars.addMomentum.toString().toLowerCase() === "true") {
-			if ((speed.X > 4 || speed.X < -4) || (speed.Y > 4 || speed.Y < -4)) {
-				e.speedX = speed.X;
-				e.speedY = speed.Y;
-				e.ids = touch.getFingerIDs(e);
-				e.xPos = xP;
-				e.yPos = yP;
-				e.timeStamps = tS;
-				e.xPosNow = touch.vars.xPosNow;
-				e.yPosNow = touch.vars.yPosNow;
-				e.touchesLength = e.systemInfo.touches.length;
-				touch.core.addMomentum(e);
+			if(this.oldBase) {
+				this.oldBase.removeEventListener('mousedown', passMouseDown, false);
+				this.oldBase.removeEventListener('mousemove', passMouseMove, false);
+				this.oldBase.removeEventListener('mouseup', passMouseOut, false);
+				this.oldBase.removeEventListener('mouseout', passMouseUp, false);
 			} else {
-				setTimeout(function(){
-					delete touch.vars.timeStamps[id];
-					delete xP[id];
-					delete yP[id];
-				}, 15);
+				this.oldBase = newBase;
+			}
+			newBase.addEventListener('mousedown', passMouseDown, false);
+			newBase.addEventListener('mousemove', passMouseMove, false);
+			newBase.addEventListener('mouseup', passMouseUp, false);
+			newBase.addEventListener('mouseout', passMouseOut, false);
+		}
+	};
+
+	window['TOUCHJS'] = {
+		'changeTouchBase': function(newBase) {
+			touchBase.changeTouchBase.call(touchBase, newBase);
+		},
+		'setThresholds': function(props) {
+			// thresholds = {
+			//     swiping: {x:number, y:number},
+			//     swipe: {x:number, y:number},
+			//     pinch: number,
+			//     gradient: number
+			// }
+			if(props['swiping']) {
+				touchBase.xThreshold = props['swiping'].x || 20;
+				touchBase.yThreshold = props['swiping'].y || 20;
+			}
+			if(props['swipe']) {
+				touchBase.xEndThreshold = props['swipe'].x || 40;
+				touchBase.yEndThreshold = props['swipe'].y || 40;
+			}
+			if(props['pinch']) {
+				touchBase.pThreshold = props['pinch'];
+			}
+			if(props['gradient']) {
+				touchBase.gradThreshold = props['gradient'];
 			}
 		}
-	},
-	addMomentum: function(e) {
-		"use strict";
-		//console.log("addMomentum");
-		e.speedX = touch.vars.speed.X;
-		e.speedY = touch.vars.speed.Y;
-		innerMomentum(e);
+	};
 
-		/*function editEvent(e) {
-			e.ids = [];
-			e.xPos = xP;
-			e.yPos = yP;
-			e.timeStamps = touch.vars.timeStamps;
-			e.xPosNowow = xPN;
-			e.yPosNowow = yPN;
-			e.touchesLength = 0;
-			return e;
-		}*/
+	//backwards compatibility
+	window['changeTouchBase'] = window['TOUCHJS']['changeTouchBase'];
 
-		function innerMomentum(e) {
-			//console.log("innerMomentum");
-			var	xFriction = touch.options.xFriction,
-			yFriction = touch.options.yFriction,
-			max,
-			id,
-			last;
-
-			for (var i in e.xPos) {
-				if (e.xPos.hasOwnProperty(i) && typeof(i) !== 'function') {
-					id = i;
-					last = e.xPos[id].length - 1;
-					break;
-				}
-			}
-			switch (true) {
-				case touch.vars.isTouching == (1 || 2):
-					delete touch.vars.timeStamps[id];
-					delete e.xPos[id];
-					delete e.yPos[id];
-					break;
-				case (e.speedX <-0.2 && e.speedY < -0.2):
-					e.speedX = e.speedX + Math.abs(e.speedX * xFriction);
-					e.xPos[id][last + 1] = e.xPos[id][last] + e.speedX;
-					e.speedY = e.speedY + Math.abs(e.speedY * yFriction);
-					e.yPos[id][last + 1] = e.yPos[id][last] + e.speedY;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedX > 0.2 && e.speedY > 0.2):
-					e.speedX = e.speedX - Math.abs(e.speedX * xFriction);
-					e.xPos[id][last + 1] = e.xPos[id][last] + e.speedX;
-					e.speedY = e.speedY - Math.abs(e.speedY * yFriction);
-					e.yPos[id][last + 1] = e.yPos[id][last] + e.speedY;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedX > 0.2 && e.speedY < -0.2):
-					e.speedX = e.speedX - Math.abs(e.speedX * xFriction);
-					e.xPos[id][last + 1] = e.xPos[id][last] + e.speedX;
-					e.speedY = e.speedY + Math.abs(e.speedY * yFriction);
-					e.yPos[id][last + 1] = e.yPos[id][last] + e.speedY;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedX < -0.2 && e.speedY > 0.2):
-					e.speedX = e.speedX + Math.abs(e.speedX * xFriction);
-					e.xPos[id][last + 1] = e.xPos[id][last] + e.speedX;
-					e.speedY = e.speedY - Math.abs(e.speedY * yFriction);
-					e.yPos[id][last + 1] = e.yPos[id][last] + e.speedY;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedX < -0.2 && (e.speedY < 0.2 && e.speedY > -0.2)):
-					e.speedX = e.speedX + Math.abs(e.speedX * xFriction);
-					e.xPos[id][last + 1] = e.xPos[id][last] + e.speedX;
-					e.yPos[id][last + 1] = e.yPos[id][last];
-					e.speedY = 0;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedX > 0.2 && (e.speedY < 0.2 && e.speedY > -0.2)):
-					e.speedX = e.speedX - Math.abs(e.speedX * xFriction);
-					e.xPos[id][last + 1] = e.xPos[id][last] + e.speedX;
-					e.yPos[id][last + 1] = e.yPos[id][last];
-					e.speedY = 0;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedY > 0.2 && (e.speedX < 0.2 && e.speedX > -0.2)):
-					e.speedY = e.speedY - Math.abs(e.speedY * yFriction);
-					e.yPos[id][last + 1] = e.yPos[id][last] + e.speedY;
-					e.xPos[id][last + 1] = e.xPos[id][last];
-					e.speedX = 0;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				case (e.speedY < -0.2 && (e.speedX < 0.2 && e.speedX > -0.2)):
-					e.speedY = e.speedY + Math.abs(e.speedY * yFriction);
-					e.yPos[id][last + 1] = e.yPos[id][last] + e.speedY;
-					e.xPos[id][last + 1] = e.xPos[id][last];
-					e.speedX = 0;
-					e.xPosNow[id] = e.xPos[id][last + 1];
-					e.yPosNow[id] = e.yPos[id][last + 1];
-					e.displacementX[id] = e.xPosNow[id]- e.xPos[id][0];
-					e.displacementY[id] = e.yPosNow[id]- e.yPos[id][0];
-					touch.funcs.momentum(e);
-					setTimeout(function(){innerMomentum(e);}, 20);
-					break;
-				default:
-					e.speedX = 0;
-					e.speedY = 0;
-					delete touch.vars.timeStamps[id];
-					delete e.xPos[id];
-					delete e.yPos[id];
-					break;
-			}
-		}
-	}
-};
-
-if(typeof window[touchIdentifier] !== 'undefined'){
-	touch.oldTouch = window[touchIdentifier];
-}
-window[touchIdentifier] = touch.invoke;
-
-touch.invoke.noConflict = function(){
-	window[touchIdentifier] = touch.oldTouch;
-
-	return touch.invoke;
-};
-
-}('touch'));
+	changeTouchBase(window);
+	//debug aid
+	//window['touchBase'] = touchBase;
+}());
